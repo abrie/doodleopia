@@ -9,8 +9,8 @@ html {
 
 #canvas {
   position: relative;
-  width: calc(16 * 50px);
-  height: calc(9 * 50px);
+  width: 100%;
+  padding-top: 56.25%;
   cursor: crosshair;
 }
 
