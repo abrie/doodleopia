@@ -6,19 +6,18 @@ const canvas = document.getElementById("canvas");
 const transformPoint = new PointTransformer(canvas);
 
 const polylines = new Polylines({
-  transformPoint,
   onNewPolyline: (polyline) => canvas.appendChild(polyline),
 });
 
 const touches = new TouchList({
   onTouchDown: (arr) => {
-    polylines.newPolyline(arr);
+    polylines.newPolyline(arr.map(transformPoint));
   },
   onTouchUp: (arr) => {
-    polylines.updatePolyline(arr);
+    polylines.updatePolyline(arr.map(transformPoint));
   },
   onTouchMove: (arr) => {
-    polylines.updatePolyline(arr);
+    polylines.updatePolyline(arr.map(transformPoint));
   },
 });
 
