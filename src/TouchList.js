@@ -6,11 +6,12 @@ function copy(evt) {
 }
 
 export default class TouchList {
-  constructor({ onTouchDown, onTouchMove, onTouchUp }) {
+  constructor({ onTouchDown, onTouchMove, onTouchUp, onTouchCancel }) {
     this.touches = {};
     this.onTouchDown = onTouchDown;
     this.onTouchMove = onTouchMove;
     this.onTouchUp = onTouchUp;
+    this.onTouchCancel = onTouchCancel;
   }
 
   down(evt) {
@@ -41,5 +42,6 @@ export default class TouchList {
       ? this.touches[evt.pointerId]
       : [];
     delete this.touches[evt.pointerId];
+    this.onTouchCancel();
   }
 }

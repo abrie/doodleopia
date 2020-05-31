@@ -1,14 +1,33 @@
-#img {
-  display: block;
-  margin: auto;
-  height: 128px;
-  width: 128px;
-  padding: 2rem;
+html {
+  box-sizing: border-box;
+}
+*,
+*:before,
+*:after {
+  box-sizing: inherit;
 }
 
 #canvas {
-  display: block;
-  margin: 2rem auto;
-  width: 540px;
-  height: 540px;
+  position: relative;
+  width: calc(16 * 50px);
+  height: calc(9 * 50px);
+  cursor: crosshair;
+}
+
+#working {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  border: 1px solid red;
+}
+
+#finished {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  border: 1px solid green;
 }

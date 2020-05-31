@@ -1,18 +1,31 @@
 export default class Polylines {
-  constructor({ onNewPolyline }) {
+  constructor({ onFinishedPolyline, onNewPolyline, onCancelPolyline }) {
     this.onNewPolyline = onNewPolyline;
+    this.onFinishedPolyline = onFinishedPolyline;
+    this.onCancelPolyline = onCancelPolyline;
     this.polyline = undefined;
   }
 
-  newPolyline(arr) {
+  startPolyline(arr) {
     this.polyline = new Polyline();
     this.updatePolyline(arr);
     this.onNewPolyline(this.polyline);
   }
 
+  finishPolyline(arr) {
+    const finished = new Polyline();
+    const points = arr.map(({ x, y }) => `${x},${y}`);
+    finished.setAttributeNS(null, "points", points);
+    this.onFinishedPolyline({ original: this.polyline, finished });
+  }
+
   updatePolyline(arr) {
     const points = arr.map(({ x, y }) => `${x},${y}`);
     this.polyline.setAttributeNS(null, "points", points);
+  }
+
+  cancelPolyline() {
+    this.onCancelPolyline({ canceled: this.polyline });
   }
 }
 
