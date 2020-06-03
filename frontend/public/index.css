@@ -7,11 +7,30 @@ html {
   box-sizing: inherit;
 }
 
+h1 {
+  color: white;
+  margin: 0;
+  font-size: 140%;
+  background: #444;
+  padding: 5px;
+}
+
+#app {
+  display: flex;
+  flex-flow: column nowrap;
+  align-items: center;
+}
+
 #canvas {
+  width: 95%;
+  flex: 0 0 95%;
+  align-self: center;
   position: relative;
   width: 100%;
   padding-top: 56.25%;
   cursor: crosshair;
+  border: 5px solid #444;
+  border-radius: 5px;
 }
 
 #working {
@@ -20,7 +39,6 @@ html {
   position: absolute;
   top: 0;
   left: 0;
-  border: 1px solid red;
 }
 
 #finished {
@@ -29,5 +47,4 @@ html {
   position: absolute;
   top: 0;
   left: 0;
-  border: 1px solid green;
 }
