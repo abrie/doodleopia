@@ -2,6 +2,7 @@
   "scripts": {
     "start": "snowpack dev",
     "build": "snowpack build",
+    "deploy": "rsync -avp build/ core@abrie.dev:/home/core/data/doodleopia/www",
     "test": "echo \"This template does not include a test runner by default.\" && exit 1",
     "format": "prettier --write 'src/**/*.js'",
     "lint": "prettier --check 'src/**/*.js'"
@@ -10,6 +11,9 @@
     "canvas-confetti": "^1.2.0"
   },
   "devDependencies": {
+    "@babel/core": "^7.10.2",
+    "@babel/preset-env": "^7.10.2",
+    "@snowpack/plugin-webpack": "^1.1.0",
     "prettier": "^2.0.0",
     "snowpack": "^2.0.0"
   }

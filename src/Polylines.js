@@ -1,8 +1,14 @@
 export default class Polylines {
-  constructor({ onFinishedPolyline, onNewPolyline, onCancelPolyline }) {
+  constructor({
+    onFinishedPolyline,
+    onNewPolyline,
+    onCancelPolyline,
+    pathProcessor,
+  }) {
     this.onNewPolyline = onNewPolyline;
     this.onFinishedPolyline = onFinishedPolyline;
     this.onCancelPolyline = onCancelPolyline;
+    this.processPath = pathProcessor;
     this.polyline = undefined;
   }
 
@@ -14,13 +20,13 @@ export default class Polylines {
 
   finishPolyline(arr) {
     const finished = new Polyline();
-    const points = arr.map(({ x, y }) => `${x},${y}`);
+    const points = this.processPath(arr).map(coordToString);
     finished.setAttributeNS(null, "points", points);
     this.onFinishedPolyline({ original: this.polyline, finished });
   }
 
   updatePolyline(arr) {
-    const points = arr.map(({ x, y }) => `${x},${y}`);
+    const points = this.processPath(arr).map(coordToString);
     this.polyline.setAttributeNS(null, "points", points);
   }
 
@@ -29,11 +35,16 @@ export default class Polylines {
   }
 }
 
+function coordToString([x, y]) {
+  return `${x},${y}`;
+}
+
 function Polyline() {
   const xmlns = "http://www.w3.org/2000/svg";
   const polyline = document.createElementNS(xmlns, "polyline");
   polyline.setAttributeNS(null, "points", "");
   polyline.setAttributeNS(null, "fill", "none");
   polyline.setAttributeNS(null, "stroke", "black");
+  polyline.setAttributeNS(null, "stroke-linejoin", "arcs");
   return polyline;
 }

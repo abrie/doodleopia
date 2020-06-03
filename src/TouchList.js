@@ -1,8 +1,5 @@
-function copy(evt) {
-  return {
-    x: evt.clientX,
-    y: evt.clientY,
-  };
+function coordinatesOfEvent(evt) {
+  return [evt.clientX, evt.clientY];
 }
 
 export default class TouchList {
@@ -18,7 +15,7 @@ export default class TouchList {
     this.touches[evt.pointerId] = this.touches[evt.pointerId]
       ? this.touches[evt.pointerId]
       : [];
-    this.touches[evt.pointerId].push(copy(evt));
+    this.touches[evt.pointerId].push(coordinatesOfEvent(evt));
     this.onTouchDown(this.touches[event.pointerId]);
   }
 
@@ -32,7 +29,7 @@ export default class TouchList {
 
   move(evt) {
     if (this.touches[evt.pointerId]) {
-      this.touches[evt.pointerId].push(copy(evt));
+      this.touches[evt.pointerId].push(coordinatesOfEvent(evt));
       this.onTouchMove(this.touches[evt.pointerId]);
     }
   }

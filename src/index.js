@@ -1,6 +1,9 @@
 import TouchList from "./TouchList.js";
 import Polylines from "./Polylines.js";
 import PointTransformer from "./PointTransformer.js";
+import radialSimplify from "./algorithms/RadialDistance.js";
+import rdpSimplify from "./algorithms/RamerDouglasPeucker.js";
+import simplify from "./algorithms/PassThrough.js";
 
 const workingCanvas = document.getElementById("working");
 const finishedCanvas = document.getElementById("finished");
@@ -15,6 +18,7 @@ const polylines = new Polylines({
   onCancelPolyline: ({ canceled }) => {
     workingCanvas.removeChild(canceled);
   },
+  pathProcessor: (arr) => rdpSimplify(arr, 1),
 });
 
 const touches = new TouchList({
