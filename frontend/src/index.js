@@ -4,6 +4,7 @@ import PointTransformer from "./PointTransformer.js";
 import radialSimplify from "./algorithms/RadialDistance.js";
 import rdpSimplify from "./algorithms/RamerDouglasPeucker.js";
 import simplify from "./algorithms/PassThrough.js";
+import callService from "./service.js";
 
 const workingCanvas = document.getElementById("working");
 const finishedCanvas = document.getElementById("finished");
@@ -18,21 +19,21 @@ const polylines = new Polylines({
   onCancelPolyline: ({ canceled }) => {
     workingCanvas.removeChild(canceled);
   },
-  pathProcessor: (arr) => rdpSimplify(arr, 1),
+  pathProcessor: (arr) => rdpSimplify(arr, 2),
 });
 
 const touches = new TouchList({
-  onTouchDown: (arr) => {
-    polylines.startPolyline(arr.map(transformPoint));
+  onTouchDown: ({ id, data }) => {
+    polylines.startPolyline({ id, data: data.map(transformPoint) });
   },
-  onTouchUp: (arr) => {
-    polylines.finishPolyline(arr.map(transformPoint));
+  onTouchUp: ({ id, data }) => {
+    polylines.finishPolyline({ id, data: data.map(transformPoint) });
   },
-  onTouchMove: (arr) => {
-    polylines.updatePolyline(arr.map(transformPoint));
+  onTouchMove: ({ id, data }) => {
+    polylines.updatePolyline({ id, data: data.map(transformPoint) });
   },
-  onTouchCancel: (arr) => {
-    polylines.cancelPolyline();
+  onTouchCancel: ({ id }) => {
+    polylines.cancelPolyline({ id });
   },
 });
 
@@ -40,3 +41,18 @@ canvas.addEventListener("pointerdown", (evt) => touches.down(evt), false);
 canvas.addEventListener("pointerup", (evt) => touches.up(evt), false);
 canvas.addEventListener("pointercancel", (evt) => touches.cancel(evt), false);
 canvas.addEventListener("pointermove", (evt) => touches.move(evt), false);
+
+document.getElementById("send-button").addEventListener("click", () => store());
+
+function store() {
+  const el = document.getElementById("finished");
+  const serialized = new XMLSerializer().serializeToString(el);
+
+  callService("/data/vector/", {
+    filename: "content.svg",
+    svg: serialized,
+    json: "jsoncontent",
+  })
+    .then(() => console.log("stored"))
+    .catch((err) => console.error(err));
+}

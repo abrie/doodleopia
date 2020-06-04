@@ -9,29 +9,37 @@ export default class Polylines {
     this.onFinishedPolyline = onFinishedPolyline;
     this.onCancelPolyline = onCancelPolyline;
     this.processPath = pathProcessor;
-    this.polyline = undefined;
+    this.polylines = {};
   }
 
-  startPolyline(arr) {
-    this.polyline = new Polyline();
-    this.updatePolyline(arr);
-    this.onNewPolyline(this.polyline);
+  startPolyline({ id, data }) {
+    this.polylines[id] = new Polyline();
+    this.updatePolyline({ id, data });
+    this.onNewPolyline(this.polylines[id]);
   }
 
-  finishPolyline(arr) {
+  finishPolyline({ id, data }) {
     const finished = new Polyline();
-    const points = this.processPath(arr).map(coordToString);
-    finished.setAttributeNS(null, "points", points);
-    this.onFinishedPolyline({ original: this.polyline, finished });
+    finished.setAttributeNS(
+      null,
+      "points",
+      this.processPath(data).map(coordToString)
+    );
+    this.onFinishedPolyline({ original: this.polylines[id], finished });
+    delete this.polylines[id];
   }
 
-  updatePolyline(arr) {
-    const points = this.processPath(arr).map(coordToString);
-    this.polyline.setAttributeNS(null, "points", points);
+  updatePolyline({ id, data }) {
+    this.polylines[id].setAttributeNS(
+      null,
+      "points",
+      this.processPath(data).map(coordToString)
+    );
   }
 
-  cancelPolyline() {
-    this.onCancelPolyline({ canceled: this.polyline });
+  cancelPolyline({ id }) {
+    this.onCancelPolyline({ canceled: this.polylines[id] });
+    delete this.polylines[id];
   }
 }
 
