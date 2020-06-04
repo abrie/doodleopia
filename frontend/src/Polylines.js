@@ -1,14 +1,8 @@
 export default class Polylines {
-  constructor({
-    onFinishedPolyline,
-    onNewPolyline,
-    onCancelPolyline,
-    pathProcessor,
-  }) {
+  constructor({ onFinishedPolyline, onNewPolyline, onCanceledPolyline }) {
     this.onNewPolyline = onNewPolyline;
     this.onFinishedPolyline = onFinishedPolyline;
-    this.onCancelPolyline = onCancelPolyline;
-    this.processPath = pathProcessor;
+    this.onCanceledPolyline = onCanceledPolyline;
     this.polylines = {};
   }
 
@@ -20,21 +14,13 @@ export default class Polylines {
 
   finishPolyline({ id, data }) {
     const finished = new Polyline();
-    finished.setAttributeNS(
-      null,
-      "points",
-      this.processPath(data).map(coordToString)
-    );
+    finished.setAttributeNS(null, "points", data.map(coordToString));
     this.onFinishedPolyline({ original: this.polylines[id], finished });
     delete this.polylines[id];
   }
 
   updatePolyline({ id, data }) {
-    this.polylines[id].setAttributeNS(
-      null,
-      "points",
-      this.processPath(data).map(coordToString)
-    );
+    this.polylines[id].setAttributeNS(null, "points", data.map(coordToString));
   }
 
   cancelPolyline({ id }) {

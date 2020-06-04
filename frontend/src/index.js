@@ -1,5 +1,6 @@
 import TouchList from "./TouchList.js";
 import Polylines from "./Polylines.js";
+import Paths from "./Paths.js";
 import PointTransformer from "./PointTransformer.js";
 import radialSimplify from "./algorithms/RadialDistance.js";
 import rdpSimplify from "./algorithms/RamerDouglasPeucker.js";
@@ -16,24 +17,31 @@ const polylines = new Polylines({
     workingCanvas.removeChild(original);
     finishedCanvas.appendChild(finished);
   },
-  onCancelPolyline: ({ canceled }) => {
+  onCanceledPolyline: ({ canceled }) => {
     workingCanvas.removeChild(canceled);
   },
+});
+
+const paths = new Paths({
+  onNewPath: ({ id, data }) => polylines.startPolyline({ id, data }),
+  onFinishedPath: ({ id, data }) => polylines.finishPolyline({ id, data }),
+  onUpdatedPath: ({ id, data }) => polylines.updatePolyline({ id, data }),
+  onCancledPath: ({ id }) => polylines.cancelPath({ id }),
   pathProcessor: (arr) => rdpSimplify(arr, 2),
 });
 
 const touches = new TouchList({
   onTouchDown: ({ id, data }) => {
-    polylines.startPolyline({ id, data: data.map(transformPoint) });
+    paths.startPath({ id, data: data.map(transformPoint) });
   },
   onTouchUp: ({ id, data }) => {
-    polylines.finishPolyline({ id, data: data.map(transformPoint) });
+    paths.finishPath({ id, data: data.map(transformPoint) });
   },
   onTouchMove: ({ id, data }) => {
-    polylines.updatePolyline({ id, data: data.map(transformPoint) });
+    paths.updatePath({ id, data: data.map(transformPoint) });
   },
   onTouchCancel: ({ id }) => {
-    polylines.cancelPolyline({ id });
+    paths.cancelPath({ id });
   },
 });
 
