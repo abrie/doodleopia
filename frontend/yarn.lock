@@ -18,7 +18,7 @@
     invariant "^2.2.4"
     semver "^5.5.0"
 
-"@babel/core@^7.10.2":
+"@babel/core@^7.10.2", "@babel/core@^7.9.6":
   version "7.10.2"
   resolved "https://registry.yarnpkg.com/@babel/core/-/core-7.10.2.tgz#bd6786046668a925ac2bd2fd95b579b92a23b36a"
   integrity sha512-KQmV9yguEjQsXqyOUGKjS4+3K8/DlOCE2pZcq4augdQmtTy5iv5EHtmMSJ7V4c1BIPjuwtZYqYLCq9Ga+hGBRQ==
@@ -339,6 +339,14 @@
     "@babel/helper-create-class-features-plugin" "^7.10.1"
     "@babel/helper-plugin-utils" "^7.10.1"
 
+"@babel/plugin-proposal-throw-expressions@^7.10.1":
+  version "7.10.1"
+  resolved "https://registry.yarnpkg.com/@babel/plugin-proposal-throw-expressions/-/plugin-proposal-throw-expressions-7.10.1.tgz#89bde971b6081bfecff832c811ad76c2337c6970"
+  integrity sha512-wyhTn1ebUbbphDJVVUpg1wikUOIW8Lg93ng0aDGv07+MxINPS4d0ju68JVH06W4oMnZTwgELA5AImrah9RULYA==
+  dependencies:
+    "@babel/helper-plugin-utils" "^7.10.1"
+    "@babel/plugin-syntax-throw-expressions" "^7.10.1"
+
 "@babel/plugin-proposal-unicode-property-regex@^7.10.1", "@babel/plugin-proposal-unicode-property-regex@^7.4.4":
   version "7.10.1"
   resolved "https://registry.yarnpkg.com/@babel/plugin-proposal-unicode-property-regex/-/plugin-proposal-unicode-property-regex-7.10.1.tgz#dc04feb25e2dd70c12b05d680190e138fa2c0c6f"
@@ -416,6 +424,13 @@
   integrity sha512-KoK9ErH1MBlCPxV0VANkXW2/dw4vlbGDrFgz8bmUsBGYkFRcbRwMh6cIJubdPrkxRwuGdtCk0v/wPTKbQgBjkg==
   dependencies:
     "@babel/helper-plugin-utils" "^7.8.0"
+
+"@babel/plugin-syntax-throw-expressions@^7.10.1":
+  version "7.10.1"
+  resolved "https://registry.yarnpkg.com/@babel/plugin-syntax-throw-expressions/-/plugin-syntax-throw-expressions-7.10.1.tgz#09a88bacf2ad8af7a465af5e910a61d93136b147"
+  integrity sha512-1ieYCCX6HCEvBefYt1Njja2XFrbThi2pffdfpPeB7WzVwbX/UlVOrPw9WSPQyVoyo+kqO0l/KGRNZyrTKo0bew==
+  dependencies:
+    "@babel/helper-plugin-utils" "^7.10.1"
 
 "@babel/plugin-syntax-top-level-await@^7.10.1":
   version "7.10.1"
@@ -886,6 +901,13 @@
   version "2.1.1"
   resolved "https://registry.yarnpkg.com/@sindresorhus/is/-/is-2.1.1.tgz#ceff6a28a5b4867c2dd4a1ba513de278ccbe8bb1"
   integrity sha512-/aPsuoj/1Dw/kzhkgz+ES6TxG0zfTMGLwuK2ZG00k/iJzYHTLCE8mVU8EPqEOp/lmxPoq1C1C9RYToRKb2KEfg==
+
+"@snowpack/plugin-babel@^1.0.0":
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/@snowpack/plugin-babel/-/plugin-babel-1.0.0.tgz#9bfde573142fafb3bf5abb6cfbb40959551ddf2f"
+  integrity sha512-azuO6Vm8bJXSlCzqEQ5JM7uv+1FtirvDL7ITB5LXL+oPxQUw1D0cTXOJxP52FP/CPpW674qHhVlLbKre5ueg9g==
+  dependencies:
+    "@babel/core" "^7.9.6"
 
 "@snowpack/plugin-webpack@^1.1.0":
   version "1.1.0"
