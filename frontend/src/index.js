@@ -6,10 +6,18 @@ import radialSimplify from "./algorithms/RadialDistance.js";
 import rdpSimplify from "./algorithms/RamerDouglasPeucker.js";
 import simplify from "./algorithms/PassThrough.js";
 import callService from "./service.js";
+import Messages from "./messages.js";
 
 const workingCanvas = document.getElementById("working");
 const finishedCanvas = document.getElementById("finished");
 const transformPoint = new PointTransformer(workingCanvas);
+
+const messages = new Messages({
+  onOpen: () => console.log("connection open"),
+  onClose: () => console.log("connection closed"),
+  onMessage: (data) => console.log(data),
+  onError: () => console.log("connection error"),
+});
 
 const polylines = new Polylines({
   onNewPolyline: (polyline) => workingCanvas.appendChild(polyline),
@@ -25,8 +33,11 @@ const polylines = new Polylines({
 const paths = new Paths({
   onNewPath: ({ id, data }) => polylines.startPolyline({ id, data }),
   onFinishedPath: ({ id, data }) => polylines.finishPolyline({ id, data }),
-  onUpdatedPath: ({ id, data }) => polylines.updatePolyline({ id, data }),
-  onCancledPath: ({ id }) => polylines.cancelPath({ id }),
+  onUpdatedPath: ({ id, data }) => {
+    polylines.updatePolyline({ id, data });
+    messages.send(JSON.stringify({ id, data }));
+  },
+  onCanceledPath: ({ id }) => polylines.cancelPath({ id }),
   pathProcessor: (arr) => rdpSimplify(arr, 2),
 });
 
@@ -45,14 +56,6 @@ const touches = new TouchList({
   },
 });
 
-canvas.addEventListener("pointerdown", (evt) => touches.down(evt), false);
-canvas.addEventListener("pointerup", (evt) => touches.up(evt), false);
-document.addEventListener("pointerup", (evt) => touches.up(evt), false);
-canvas.addEventListener("pointercancel", (evt) => touches.cancel(evt), false);
-canvas.addEventListener("pointermove", (evt) => touches.move(evt), false);
-
-document.getElementById("send-button").addEventListener("click", () => store());
-
 function store() {
   const el = document.getElementById("finished");
   const serialized = new XMLSerializer().serializeToString(el);
@@ -65,3 +68,13 @@ function store() {
     .then(() => console.log("stored"))
     .catch((err) => console.error(err));
 }
+
+canvas.addEventListener("pointerdown", (evt) => touches.down(evt), false);
+canvas.addEventListener("pointerup", (evt) => touches.up(evt), false);
+document.addEventListener("pointerup", (evt) => touches.up(evt), false);
+canvas.addEventListener("pointercancel", (evt) => touches.cancel(evt), false);
+canvas.addEventListener("pointermove", (evt) => touches.move(evt), false);
+
+document.getElementById("send-button").addEventListener("click", () => store());
+
+messages.open();

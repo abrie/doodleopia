@@ -36,16 +36,20 @@ export default class TouchList {
 
   down(evt) {
     const id = this.uuids.add(evt);
-    this.touches[id] = [];
-    this.touches[id].push(coordinatesOfEvent(evt));
-    this.onTouchDown({ id, data: this.touches[id] });
+    if (id) {
+      this.touches[id] = [];
+      this.touches[id].push(coordinatesOfEvent(evt));
+      this.onTouchDown({ id, data: this.touches[id] });
+    }
   }
 
   up(evt) {
     const id = this.uuids.get(evt);
-    this.onTouchUp({ id, data: this.touches[id] });
-    delete this.touches[id];
-    this.uuids.delete(evt);
+    if (id) {
+      this.onTouchUp({ id, data: this.touches[id] });
+      delete this.touches[id];
+      this.uuids.delete(evt);
+    }
   }
 
   move(evt) {
