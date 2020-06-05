@@ -7,7 +7,7 @@ export default class {
   }
 
   get url() {
-    return "ws://" + document.location.host + "/data/message";
+    return "ws://" + document.location.host + "/api/message";
   }
 
   open() {

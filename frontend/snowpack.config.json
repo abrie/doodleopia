@@ -5,5 +5,13 @@
     "bundle:*": "@snowpack/plugin-webpack",
     "build:js,jsx": "@snowpack/plugin-babel"
   },
+  "proxy": {
+    "/api/vector": "http://localhost:9200/",
+    "/api/message": {
+      "target": "http://localhost:9300",
+      "ws": true,
+      "ignorePath": true
+    }
+  },
   "plugins": ["@snowpack/plugin-webpack", "@snowpack/plugin-babel"]
 }
