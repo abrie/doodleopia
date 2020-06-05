@@ -47,6 +47,7 @@ const touches = new TouchList({
 
 canvas.addEventListener("pointerdown", (evt) => touches.down(evt), false);
 canvas.addEventListener("pointerup", (evt) => touches.up(evt), false);
+document.addEventListener("pointerup", (evt) => touches.up(evt), false);
 canvas.addEventListener("pointercancel", (evt) => touches.cancel(evt), false);
 canvas.addEventListener("pointermove", (evt) => touches.move(evt), false);
 
