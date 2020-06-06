@@ -83,8 +83,8 @@ const touches = new TouchList({
   },
 });
 
-function processMessage({ clientId: remoteClientId, action, id, data }) {
-  if (clientId == remoteClientId) {
+function processMessage({ clientId: remoteId, action, id, data }) {
+  if (clientId == remoteId) {
     return;
   }
 
