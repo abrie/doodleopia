@@ -1,11 +1,9 @@
 PID=.hot-compile.pid
 PWD=$(shell pwd)
-GOPATH=$(PWD)
 BIN_DIR=$(PWD)/bin
-SRC_DIR=$(PWD)
+SRC_DIR=$(PWD)/src
 BIN_NAME=service
-DATA_DIR?=data
-CONTAINER_NAME=image
+DATA_DIR?=$(PWD)/data
 
 all: build
 
@@ -14,16 +12,20 @@ initialize-dependencies:
 	-@go mod vendor
 
 update-dependencies:
-	go get -u ./...
+	cd $(SRC_DIR) && go get -u ./...
 
 build:
-	go build -v -o $(BIN_DIR)/$(BIN_NAME) backend/cmd/system
+	cd $(SRC_DIR) && go build -v -o $(BIN_DIR)/$(BIN_NAME) backend/cmd/system
+
+container:
+	docker image build -t goeieware.ca/doodleopia:latest .
+	docker push goeieware.ca/doodleopia:latest
 
 test:
-	go test -coverprofile=coverage.out ./...
+	cd $(SRC_DIR) && go test -coverprofile=coverage.out ./...
 
 test-coverage:
-	-@go tool cover -html=coverage.out
+	-cd $(SRC_DIR) && @go tool cover -html=coverage.out
 
 watch-test: test
 	@fswatch -l 0.5 -o $(SRC_DIR) -e ".*" -i "\\.go$$" | xargs -n1 -I{} make test
