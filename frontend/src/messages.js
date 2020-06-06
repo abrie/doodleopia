@@ -13,8 +13,15 @@ export default class {
   open() {
     this.conn = new WebSocket(this.url);
     this.conn.onopen = (evt) => this.onOpen && this.onOpen();
-    this.conn.onmessage = ({ data }) => this.onMessage && this.onMessage(data);
-    this.conn.onerror = (evt) => this.onError && this.onError();
+    (this.conn.onmessage = ({ data }) => {
+      if (this.onMessage) {
+        data
+          .split("\n")
+          .map((msg) => JSON.parse(msg))
+          .forEach((msg) => this.onMessage(msg));
+      }
+    }),
+      (this.conn.onerror = (evt) => this.onError && this.onError());
     this.conn.onclose = (evt) => this.onClose && this.onClose();
   }
 

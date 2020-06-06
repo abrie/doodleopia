@@ -27,6 +27,10 @@ export default class Polylines {
     this.onCancelPolyline({ canceled: this.polylines[id] });
     delete this.polylines[id];
   }
+
+  has(id) {
+    return this.polylines[id] && true;
+  }
 }
 
 function coordToString([x, y]) {

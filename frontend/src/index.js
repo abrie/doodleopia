@@ -7,7 +7,9 @@ import rdpSimplify from "./algorithms/RamerDouglasPeucker.js";
 import simplify from "./algorithms/PassThrough.js";
 import callService from "./service.js";
 import Messages from "./messages.js";
+import { v4 as uuidv4 } from "uuid";
 
+const clientId = uuidv4();
 const workingCanvas = document.getElementById("working");
 const finishedCanvas = document.getElementById("finished");
 const transformPoint = new PointTransformer(workingCanvas);
@@ -15,7 +17,7 @@ const transformPoint = new PointTransformer(workingCanvas);
 const messages = new Messages({
   onOpen: () => console.log("connection open"),
   onClose: () => console.log("connection closed"),
-  onMessage: (data) => console.log(data),
+  onMessage: (message) => processMessage(message),
   onError: () => console.log("connection error"),
 });
 
@@ -31,13 +33,38 @@ const polylines = new Polylines({
 });
 
 const paths = new Paths({
-  onNewPath: ({ id, data }) => polylines.startPolyline({ id, data }),
-  onFinishedPath: ({ id, data }) => polylines.finishPolyline({ id, data }),
+  onNewPath: ({ id, data }) => {
+    polylines.startPolyline({ id, data });
+    messages.send(JSON.stringify({ action: "new", clientId, id, data }));
+  },
+  onFinishedPath: ({ id, data }) => {
+    polylines.finishPolyline({ id, data });
+    messages.send(JSON.stringify({ action: "finished", clientId, id, data }));
+  },
   onUpdatedPath: ({ id, data }) => {
     polylines.updatePolyline({ id, data });
-    messages.send(JSON.stringify({ id, data }));
+    messages.send(JSON.stringify({ action: "updated", clientId, id, data }));
   },
-  onCanceledPath: ({ id }) => polylines.cancelPath({ id }),
+  onCanceledPath: ({ id }) => {
+    polylines.cancelPolyline({ id });
+    messages.send(JSON.stringify({ action: "canceled", clientId, id, data }));
+  },
+  pathProcessor: (arr) => rdpSimplify(arr, 2),
+});
+
+const remotePaths = new Paths({
+  onNewPath: ({ id, data }) => {
+    polylines.startPolyline({ id, data });
+  },
+  onFinishedPath: ({ id, data }) => {
+    polylines.finishPolyline({ id, data });
+  },
+  onUpdatedPath: ({ id, data }) => {
+    polylines.updatePolyline({ id, data });
+  },
+  onCanceledPath: ({ id }) => {
+    polylines.cancelPolyline({ id });
+  },
   pathProcessor: (arr) => rdpSimplify(arr, 2),
 });
 
@@ -55,6 +82,29 @@ const touches = new TouchList({
     paths.cancelPath({ id });
   },
 });
+
+function processMessage({ clientId: remoteClientId, action, id, data }) {
+  if (clientId == remoteClientId) {
+    return;
+  }
+
+  switch (action) {
+    case "new":
+      remotePaths.startPath({ id, data });
+      break;
+    case "finished":
+      remotePaths.finishPath({ id, data });
+      break;
+    case "updated":
+      remotePaths.updatePath({ id, data });
+      break;
+    case "canceled":
+      remotePaths.cancelPath({ id });
+      break;
+    default:
+      console.log(`Unknown message action: ${action}`);
+  }
+}
 
 function store() {
   const el = document.getElementById("finished");
