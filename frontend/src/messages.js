@@ -29,7 +29,7 @@ export default class {
   send(data) {
     if (this.conn) {
       try {
-        this.conn.send(data);
+        this.conn.send(JSON.stringify(data));
       } catch (err) {
         console.error(
           `Error trying to send data: "${err.name}":"${err.message}"`

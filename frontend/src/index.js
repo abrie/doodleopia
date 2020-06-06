@@ -35,19 +35,19 @@ const polylines = new Polylines({
 const localPaths = new Paths({
   onNewPath: ({ id, data }) => {
     polylines.startPolyline({ id, data });
-    messages.send(JSON.stringify({ action: "new", clientId, id, data }));
+    messages.send({ action: "new", clientId, id, data });
   },
   onFinishedPath: ({ id, data }) => {
     polylines.finishPolyline({ id, data });
-    messages.send(JSON.stringify({ action: "finished", clientId, id, data }));
+    messages.send({ action: "finished", clientId, id, data });
   },
   onUpdatedPath: ({ id, data }) => {
     polylines.updatePolyline({ id, data });
-    messages.send(JSON.stringify({ action: "updated", clientId, id, data }));
+    messages.send({ action: "updated", clientId, id, data });
   },
   onCanceledPath: ({ id }) => {
     polylines.cancelPolyline({ id });
-    messages.send(JSON.stringify({ action: "canceled", clientId, id, data }));
+    messages.send({ action: "canceled", clientId, id, data });
   },
   pathProcessor: (arr) => rdpSimplify(arr, 2),
 });
