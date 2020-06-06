@@ -12,7 +12,12 @@ h1 {
   margin: 0;
   font-size: 140%;
   background: #444;
-  padding: 5px;
+  padding: 3px 5px 0px 5px;
+  max-width: 30%;
+  align-self: flex-start;
+  border: 3px solid #444;
+  border-width: 3px 3px 0px 3px;
+  border-radius: 5px 5px 0px 0px;
 }
 
 #app {
@@ -30,7 +35,7 @@ h1 {
   padding-top: 56.25%;
   cursor: crosshair;
   border: 5px solid #444;
-  border-radius: 5px;
+  border-radius: 0px 5px 5px 5px;
 }
 
 #working {
