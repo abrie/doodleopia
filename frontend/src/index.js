@@ -32,7 +32,7 @@ const polylines = new Polylines({
   },
 });
 
-const paths = new Paths({
+const localPaths = new Paths({
   onNewPath: ({ id, data }) => {
     polylines.startPolyline({ id, data });
     messages.send(JSON.stringify({ action: "new", clientId, id, data }));
@@ -70,16 +70,16 @@ const remotePaths = new Paths({
 
 const touches = new TouchList({
   onTouchDown: ({ id, data }) => {
-    paths.startPath({ id, data: data.map(transformPoint) });
+    localPaths.startPath({ id, data: data.map(transformPoint) });
   },
   onTouchUp: ({ id, data }) => {
-    paths.finishPath({ id, data: data.map(transformPoint) });
+    localPaths.finishPath({ id, data: data.map(transformPoint) });
   },
   onTouchMove: ({ id, data }) => {
-    paths.updatePath({ id, data: data.map(transformPoint) });
+    localPaths.updatePath({ id, data: data.map(transformPoint) });
   },
   onTouchCancel: ({ id }) => {
-    paths.cancelPath({ id });
+    localPaths.cancelPath({ id });
   },
 });
 
