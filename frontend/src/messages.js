@@ -14,27 +14,29 @@ export default class {
   open() {
     this.conn = new WebSocket(this.url);
     this.conn.onopen = (evt) => this.onOpen && this.onOpen();
-    (this.conn.onmessage = ({ data }) => {
-      if (this.onMessage) {
-        data
-          .split("\n")
-          .map((msg) => JSON.parse(msg))
-          .forEach((msg) => this.onMessage(msg));
-      }
-    }),
-      (this.conn.onerror = (evt) => this.onError && this.onError());
+    this.conn.onerror = (evt) => this.onError && this.onError();
     this.conn.onclose = (evt) => this.onClose && this.onClose();
+    this.conn.onmessage = (evt) => this.receive(evt.data);
+  }
+
+  receive(data) {
+    if (this.onMessage) {
+      const messages = deserializeData(data);
+      messages.forEach((message) => this.onMessage(message));
+    }
   }
 
   send(data) {
     if (this.conn) {
-      try {
-        this.conn.send(JSON.stringify(data));
-      } catch (err) {
-        console.error(
-          `Error trying to send data: "${err.name}":"${err.message}"`
-        );
-      }
+      this.conn.send(serializeData(data));
     }
   }
+}
+
+function serializeData(data) {
+  return JSON.stringify(data);
+}
+
+function deserializeData(raw) {
+  return raw.split("\n").map((msg) => JSON.parse(msg));
 }
