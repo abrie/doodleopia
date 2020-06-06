@@ -110,7 +110,7 @@ function store() {
   const el = document.getElementById("finished");
   const serialized = new XMLSerializer().serializeToString(el);
 
-  callService("/data/vector/", {
+  callService("/api/vector/", {
     filename: "content.svg",
     svg: serialized,
     json: "jsoncontent",
