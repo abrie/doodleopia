@@ -7,7 +7,8 @@ export default class {
   }
 
   get url() {
-    return "ws://" + document.location.host + "/api/message";
+    const protocol = document.location.protocol === "http:" ? "ws:" : "wss:";
+    return protocol + "//" + document.location.host + "/api/message";
   }
 
   open() {
