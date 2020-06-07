@@ -7,8 +7,8 @@ import (
 )
 
 var upgrader = websocket.Upgrader{
-	ReadBufferSize:  1024 * 10,
-	WriteBufferSize: 1024 * 10,
+	ReadBufferSize:  1024,
+	WriteBufferSize: 1024,
 }
 
 func GetHandler(hub *Hub) http.HandlerFunc {
