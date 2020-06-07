@@ -119,11 +119,55 @@ function store() {
     .catch((err) => console.error(err));
 }
 
-canvas.addEventListener("pointerdown", (evt) => touches.down(evt), false);
-canvas.addEventListener("pointerup", (evt) => touches.up(evt), false);
-document.addEventListener("pointerup", (evt) => touches.up(evt), false);
-canvas.addEventListener("pointercancel", (evt) => touches.cancel(evt), false);
-canvas.addEventListener("pointermove", (evt) => touches.move(evt), false);
+function stopPrevent(evt) {
+  evt.stopPropagation();
+  evt.preventDefault();
+}
+
+canvas.addEventListener(
+  "pointerdown",
+  (evt) => {
+    stopPrevent(evt);
+    touches.down(evt);
+  },
+  false
+);
+
+canvas.addEventListener(
+  "pointerup",
+  (evt) => {
+    stopPrevent(evt);
+    touches.up(evt);
+  },
+  false
+);
+
+document.addEventListener(
+  "pointerup",
+  (evt) => {
+    stopPrevent(evt);
+    touches.up(evt);
+  },
+  false
+);
+
+canvas.addEventListener(
+  "pointercancel",
+  (evt) => {
+    stopPrevent(evt);
+    touches.cancel(evt);
+  },
+  false
+);
+
+canvas.addEventListener(
+  "pointermove",
+  (evt) => {
+    stopPrevent(evt);
+    touches.move(evt);
+  },
+  false
+);
 
 document.getElementById("send-button").addEventListener("click", () => store());
 

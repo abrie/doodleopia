@@ -15,17 +15,24 @@ export default class Paths {
   }
 
   startPath({ id, data }) {
-    this.paths[id] = new Path({ id, data: data.map(this.pathProcessor) });
+    this.paths[id] = new Path({
+      id,
+      raw: data,
+      data: data.map(this.pathProcessor),
+    });
     this.onNewPath(this.paths[id]);
   }
 
   updatePath({ id, data }) {
-    this.paths[id].data = data.map(this.pathProcessor);
+    console.log(id, data);
+    const raw = this.paths[id].raw.concat(data);
+    this.paths[id].raw = raw;
+    this.paths[id].data = raw.map(this.pathProcessor);
     this.onUpdatedPath(this.paths[id]);
   }
 
   finishPath({ id, data }) {
-    this.paths[id].data = data.map(this.pathProcessor);
+    this.updatePath({ id, data });
     this.onFinishedPath(this.paths[id]);
   }
 
@@ -35,6 +42,6 @@ export default class Paths {
   }
 }
 
-function Path({ id, data }) {
-  return { id, data };
+function Path({ id, raw, data }) {
+  return { id, raw, data };
 }
