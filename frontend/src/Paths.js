@@ -24,10 +24,12 @@ export default class Paths {
   }
 
   updatePath({ id, data }) {
-    const raw = this.paths[id].raw.concat(data);
-    this.paths[id].raw = raw;
-    this.paths[id].data = raw.map(this.pathProcessor);
-    this.onUpdatedPath(this.paths[id]);
+    if (this.paths[id]) {
+      const raw = this.paths[id].raw.concat(data);
+      this.paths[id].raw = raw;
+      this.paths[id].data = raw.map(this.pathProcessor);
+      this.onUpdatedPath(this.paths[id]);
+    }
   }
 
   finishPath({ id, data }) {

@@ -7,11 +7,13 @@ import rdpSimplify from "./algorithms/RamerDouglasPeucker.js";
 import simplify from "./algorithms/PassThrough.js";
 import callService from "./service.js";
 import Messages from "./messages.js";
+import Cursors from "./Cursors.js";
 import { v4 as uuidv4 } from "uuid";
 
 const clientId = uuidv4();
 const workingCanvas = document.getElementById("working");
 const finishedCanvas = document.getElementById("finished");
+const cursorCanvas = document.getElementById("cursors");
 const transformPoint = new PointTransformer(workingCanvas);
 
 const messages = new Messages({
@@ -19,6 +21,11 @@ const messages = new Messages({
   onClose: () => console.log("connection closed"),
   onMessage: (message) => processMessage(message),
   onError: () => console.log("connection error"),
+});
+
+const cursors = new Cursors({
+  onNewCursor: (cursor) => cursorCanvas.appendChild(cursor),
+  onDeadCursor: (cursor) => cursorCanvas.removeChild(cursor),
 });
 
 const polylines = new Polylines({
@@ -91,6 +98,18 @@ const touches = new TouchList({
       id,
       data: data.map(transformPoint),
     });
+    messages.send({
+      action: "cursor",
+      clientId,
+      data: transformPoint(data[0]),
+    });
+  },
+  onTouchHover: ({ id, data }) => {
+    messages.send({
+      action: "cursor",
+      clientId,
+      data: transformPoint(data),
+    });
   },
   onTouchCancel: ({ id }) => {
     localPaths.cancelPath({ id });
@@ -115,6 +134,9 @@ function processMessage({ clientId: remoteId, action, id, data }) {
       break;
     case "cancel":
       remotePaths.cancelPath({ id });
+      break;
+    case "cursor":
+      cursors.updateCursor(remoteId, data);
       break;
     default:
       console.log(`Unknown message action: ${action}`);

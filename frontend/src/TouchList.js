@@ -25,12 +25,19 @@ class PointerIdToUuid {
 }
 
 export default class TouchList {
-  constructor({ onTouchDown, onTouchMove, onTouchUp, onTouchCancel }) {
+  constructor({
+    onTouchDown,
+    onTouchMove,
+    onTouchHover,
+    onTouchUp,
+    onTouchCancel,
+  }) {
     this.touches = {};
     this.uuids = new PointerIdToUuid();
     this.onTouchDown = onTouchDown;
     this.onTouchMove = onTouchMove;
     this.onTouchUp = onTouchUp;
+    this.onTouchHover = onTouchHover;
     this.onTouchCancel = onTouchCancel;
   }
 
@@ -57,6 +64,9 @@ export default class TouchList {
     if (id) {
       const data = [eventCoordinates(evt)];
       this.onTouchMove({ id, data });
+    } else {
+      const data = eventCoordinates(evt);
+      this.onTouchHover({ id, data });
     }
   }
 
