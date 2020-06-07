@@ -35,19 +35,15 @@ const polylines = new Polylines({
 const localPaths = new Paths({
   onNewPath: ({ id, data }) => {
     polylines.startPolyline({ id, data });
-    messages.send({ action: "new", clientId, id, data });
   },
   onFinishedPath: ({ id, data }) => {
     polylines.finishPolyline({ id, data });
-    messages.send({ action: "finished", clientId, id, data });
   },
   onUpdatedPath: ({ id, data }) => {
     polylines.updatePolyline({ id, data });
-    messages.send({ action: "updated", clientId, id, data });
   },
   onCanceledPath: ({ id }) => {
     polylines.cancelPolyline({ id });
-    messages.send({ action: "canceled", clientId, id, data });
   },
   pathProcessor: (arr) => rdpSimplify(arr, 2),
 });
@@ -71,15 +67,34 @@ const remotePaths = new Paths({
 const touches = new TouchList({
   onTouchDown: ({ id, data }) => {
     localPaths.startPath({ id, data: data.map(transformPoint) });
+    messages.send({
+      action: "down",
+      clientId,
+      id,
+      data: data.map(transformPoint),
+    });
   },
   onTouchUp: ({ id, data }) => {
     localPaths.finishPath({ id, data: data.map(transformPoint) });
+    messages.send({
+      action: "up",
+      clientId,
+      id,
+      data: data.map(transformPoint),
+    });
   },
   onTouchMove: ({ id, data }) => {
     localPaths.updatePath({ id, data: data.map(transformPoint) });
+    messages.send({
+      action: "move",
+      clientId,
+      id,
+      data: data.map(transformPoint),
+    });
   },
   onTouchCancel: ({ id }) => {
     localPaths.cancelPath({ id });
+    messages.send({ action: "cancel", clientId, id });
   },
 });
 
@@ -89,16 +104,16 @@ function processMessage({ clientId: remoteId, action, id, data }) {
   }
 
   switch (action) {
-    case "new":
+    case "down":
       remotePaths.startPath({ id, data });
       break;
-    case "finished":
+    case "up":
       remotePaths.finishPath({ id, data });
       break;
-    case "updated":
+    case "move":
       remotePaths.updatePath({ id, data });
       break;
-    case "canceled":
+    case "cancel":
       remotePaths.cancelPath({ id });
       break;
     default:

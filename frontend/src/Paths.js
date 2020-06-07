@@ -24,7 +24,6 @@ export default class Paths {
   }
 
   updatePath({ id, data }) {
-    console.log(id, data);
     const raw = this.paths[id].raw.concat(data);
     this.paths[id].raw = raw;
     this.paths[id].data = raw.map(this.pathProcessor);
