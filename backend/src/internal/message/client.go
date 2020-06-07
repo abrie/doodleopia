@@ -33,6 +33,11 @@ var (
 	space   = []byte{' '}
 )
 
+func (c *Client) pongHandler(string) error {
+	c.conn.SetReadDeadline(time.Now().Add(pongWait))
+	return nil
+}
+
 func (c *Client) readPump() {
 	defer func() {
 		c.hub.unregister <- c
@@ -41,7 +46,7 @@ func (c *Client) readPump() {
 
 	c.conn.SetReadLimit(maxMessageSize)
 	c.conn.SetReadDeadline(time.Now().Add(pongWait))
-	c.conn.SetPongHandler(func(string) error { c.conn.SetReadDeadline(time.Now().Add(pongWait)); return nil })
+	c.conn.SetPongHandler(c.pongHandler)
 
 	for {
 		_, message, err := c.conn.ReadMessage()
