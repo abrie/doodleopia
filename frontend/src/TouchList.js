@@ -1,6 +1,6 @@
 import { v4 as uuidv4 } from "uuid";
 
-function coordinatesOfEvent(evt) {
+function eventCoordinates(evt) {
   return [evt.clientX, evt.clientY];
 }
 
@@ -38,7 +38,7 @@ export default class TouchList {
     const id = this.uuids.add(evt);
     if (id) {
       this.touches[id] = [];
-      this.touches[id].push(coordinatesOfEvent(evt));
+      this.touches[id].push(eventCoordinates(evt));
       this.onTouchDown({ id, data: this.touches[id] });
     }
   }
@@ -55,7 +55,7 @@ export default class TouchList {
   move(evt) {
     const id = this.uuids.get(evt);
     if (this.touches[id]) {
-      this.touches[id].push(coordinatesOfEvent(evt));
+      this.touches[id].push(eventCoordinates(evt));
       this.onTouchMove({ id, data: this.touches[id] });
     }
   }
