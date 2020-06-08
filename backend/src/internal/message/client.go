@@ -56,17 +56,21 @@ func (c *Client) readPump() {
 			}
 			break
 		}
+
 		message = bytes.TrimSpace(bytes.Replace(message, newline, space, -1))
+
 		c.hub.broadcast <- message
 	}
 }
 
 func (c *Client) writePump() {
 	ticker := time.NewTicker(pingPeriod)
+
 	defer func() {
 		ticker.Stop()
 		c.conn.Close()
 	}()
+
 	for {
 		select {
 		case message, ok := <-c.send:
@@ -79,6 +83,7 @@ func (c *Client) writePump() {
 
 			w, err := c.conn.NextWriter(websocket.TextMessage)
 			if err != nil {
+				log.Printf("client writePump failed to get a Writer: %v", err)
 				return
 			}
 			w.Write(message)
@@ -91,11 +96,13 @@ func (c *Client) writePump() {
 			}
 
 			if err := w.Close(); err != nil {
+				log.Printf("client writePump failed to close Writer: %v", err)
 				return
 			}
 		case <-ticker.C:
 			c.conn.SetWriteDeadline(time.Now().Add(writeWait))
 			if err := c.conn.WriteMessage(websocket.PingMessage, nil); err != nil {
+				log.Printf("client writePump failed to write PingMessage: %v", err)
 				return
 			}
 		}
