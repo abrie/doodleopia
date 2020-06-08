@@ -31,20 +31,29 @@ func (h *Hub) run() {
 			h.clients[client] = true
 
 		case client := <-h.unregister:
-			if _, ok := h.clients[client]; ok {
-				delete(h.clients, client)
-				close(client.send)
-			}
+			h.unregisterClient(client)
 
 		case message := <-h.broadcast:
 			for client := range h.clients {
-				select {
-				case client.send <- message:
-				default:
-					close(client.send)
-					delete(h.clients, client)
-				}
+				h.sendMessage(client, message)
 			}
 		}
+	}
+}
+
+func (h *Hub) sendMessage(client *Client, message []byte) {
+	select {
+
+	case client.send <- message:
+
+	default: // If the send channel buffer is full, close the client.
+		h.unregisterClient(client)
+	}
+}
+
+func (h *Hub) unregisterClient(client *Client) {
+	if _, ok := h.clients[client]; ok {
+		delete(h.clients, client)
+		close(client.send)
 	}
 }
