@@ -38,21 +38,21 @@ export default class TouchList {
 
   down(evt) {
     const id = event.pointerId;
-    const data = [eventCoordinates(evt)];
+    const data = eventCoordinates(evt);
     this.downTracker.set(id);
     this.onTouchDown({ id, data });
   }
 
   up(evt) {
     const id = event.pointerId;
-    const data = [eventCoordinates(evt)];
+    const data = eventCoordinates(evt);
     this.downTracker.delete(id);
     this.onTouchUp({ id, data });
   }
 
   move(evt) {
     const id = event.pointerId;
-    const data = [eventCoordinates(evt)];
+    const data = eventCoordinates(evt);
     if (this.downTracker.has(id)) {
       this.onTouchMove({ id, data });
     } else {

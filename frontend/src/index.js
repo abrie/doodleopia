@@ -73,42 +73,42 @@ const remotePaths = new Paths({
 
 const touches = new TouchList({
   onTouchDown: ({ id, data }) => {
-    localPaths.startPath({ id, data: data.map(transformPoint) });
+    localPaths.startPath({ id, data: transformPoint(data) });
     messages.send({
       action: "down",
       clientId,
       id,
-      data: data.map(transformPoint),
+      data: transformPoint(data),
     });
   },
   onTouchUp: ({ id, data }) => {
-    localPaths.finishPath({ id, data: data.map(transformPoint) });
+    localPaths.finishPath({ id, data: transformPoint(data) });
     messages.send({
       action: "up",
       clientId,
       id,
-      data: data.map(transformPoint),
+      data: transformPoint(data),
     });
   },
   onTouchMove: ({ id, data }) => {
-    localPaths.updatePath({ id, data: data.map(transformPoint) });
+    localPaths.updatePath({ id, data: transformPoint(data) });
     messages.send({
       action: "move",
       clientId,
       id,
-      data: data.map(transformPoint),
+      data: transformPoint(data),
     });
     messages.send({
       action: "cursor",
       clientId,
-      data: transformPoint(data[0]),
+      data: transformPoint(data),
     });
   },
   onTouchHover: ({ id, data }) => {
     messages.send({
       action: "cursor",
       clientId,
-      data: transformPoint(data[0]),
+      data: transformPoint(data),
     });
   },
   onTouchCancel: ({ id }) => {

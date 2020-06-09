@@ -17,17 +17,16 @@ export default class Paths {
   startPath({ id, data }) {
     this.paths[id] = new Path({
       id,
-      raw: data,
-      data: data.map(this.pathProcessor),
+      raw: [[...data]],
+      data: [[...data]],
     });
     this.onNewPath(this.paths[id]);
   }
 
   updatePath({ id, data }) {
     if (this.paths[id]) {
-      const raw = this.paths[id].raw.concat(data);
-      this.paths[id].raw = raw;
-      this.paths[id].data = raw.map(this.pathProcessor);
+      this.paths[id].raw.push(data);
+      this.paths[id].data = this.paths[id].raw.map(this.pathProcessor);
       this.onUpdatedPath(this.paths[id]);
     }
   }
