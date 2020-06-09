@@ -1,4 +1,4 @@
-import TouchList from "./TouchList.js";
+import Touches from "./Touches.js";
 import Polylines from "./Polylines.js";
 import Paths from "./Paths.js";
 import Canvas from "./Canvas.js";
@@ -79,7 +79,7 @@ const canvas = new Canvas({
   onPointerCancel: ({ id }) => touches.cancel({ id }),
 });
 
-const touches = new TouchList({
+const touches = new Touches({
   onTouchDown: ({ id, data }) => {
     localPaths.startPath({ id, data });
     messages.send({
