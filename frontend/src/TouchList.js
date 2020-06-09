@@ -2,7 +2,7 @@ function eventCoordinates(evt) {
   return [evt.clientX, evt.clientY];
 }
 
-class Touches {
+class DownTracker {
   constructor() {
     this.down = {};
   }
@@ -28,7 +28,7 @@ export default class TouchList {
     onTouchUp,
     onTouchCancel,
   }) {
-    this.touches = new Touches();
+    this.downTracker = new DownTracker();
     this.onTouchDown = onTouchDown;
     this.onTouchMove = onTouchMove;
     this.onTouchUp = onTouchUp;
@@ -39,21 +39,21 @@ export default class TouchList {
   down(evt) {
     const id = event.pointerId;
     const data = [eventCoordinates(evt)];
-    this.touches.set(id);
+    this.downTracker.set(id);
     this.onTouchDown({ id, data });
   }
 
   up(evt) {
     const id = event.pointerId;
     const data = [eventCoordinates(evt)];
-    this.touches.delete(id);
+    this.downTracker.delete(id);
     this.onTouchUp({ id, data });
   }
 
   move(evt) {
     const id = event.pointerId;
     const data = [eventCoordinates(evt)];
-    if (this.touches.has(id)) {
+    if (this.downTracker.has(id)) {
       this.onTouchMove({ id, data });
     } else {
       this.onTouchHover({ id, data });
@@ -62,8 +62,8 @@ export default class TouchList {
 
   cancel(evt) {
     const id = event.pointerId;
-    if (this.touches.has(id)) {
-      delete this.touches[id];
+    if (this.downTracker.has(id)) {
+      delete this.downTracker[id];
       this.onTouchCancel({ id });
     }
   }
