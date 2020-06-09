@@ -108,7 +108,7 @@ const touches = new TouchList({
     messages.send({
       action: "cursor",
       clientId,
-      data: transformPoint(data),
+      data: transformPoint(data[0]),
     });
   },
   onTouchCancel: ({ id }) => {

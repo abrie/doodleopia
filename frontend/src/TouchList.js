@@ -1,26 +1,22 @@
-import { v4 as uuidv4 } from "uuid";
-
 function eventCoordinates(evt) {
   return [evt.clientX, evt.clientY];
 }
 
-class PointerIdToUuid {
+class Touches {
   constructor() {
-    this.lookup = {};
+    this.down = {};
   }
 
-  add({ pointerId }) {
-    const uuid = uuidv4();
-    this.lookup[pointerId] = uuid;
-    return uuid;
+  set(id) {
+    this.down[id] = true;
   }
 
-  get({ pointerId }) {
-    return this.lookup[pointerId];
+  has(id) {
+    return true && this.down[id];
   }
 
-  delete({ pointerId }) {
-    delete this.lookup[pointerId];
+  delete(id) {
+    delete this.down[id];
   }
 }
 
@@ -32,8 +28,7 @@ export default class TouchList {
     onTouchUp,
     onTouchCancel,
   }) {
-    this.touches = {};
-    this.uuids = new PointerIdToUuid();
+    this.touches = new Touches();
     this.onTouchDown = onTouchDown;
     this.onTouchMove = onTouchMove;
     this.onTouchUp = onTouchUp;
@@ -42,40 +37,34 @@ export default class TouchList {
   }
 
   down(evt) {
-    const id = this.uuids.add(evt);
-    if (id) {
-      const data = [eventCoordinates(evt)];
-      this.onTouchDown({ id, data });
-    }
+    const id = event.pointerId;
+    const data = [eventCoordinates(evt)];
+    this.touches.set(id);
+    this.onTouchDown({ id, data });
   }
 
   up(evt) {
-    const id = this.uuids.get(evt);
-    if (id) {
-      const data = [eventCoordinates(evt)];
-      this.onTouchUp({ id, data });
-      delete this.touches[id];
-      this.uuids.delete(evt);
-    }
+    const id = event.pointerId;
+    const data = [eventCoordinates(evt)];
+    this.touches.delete(id);
+    this.onTouchUp({ id, data });
   }
 
   move(evt) {
-    const id = this.uuids.get(evt);
-    if (id) {
-      const data = [eventCoordinates(evt)];
+    const id = event.pointerId;
+    const data = [eventCoordinates(evt)];
+    if (this.touches.has(id)) {
       this.onTouchMove({ id, data });
     } else {
-      const data = eventCoordinates(evt);
       this.onTouchHover({ id, data });
     }
   }
 
   cancel(evt) {
-    const id = this.uuids.get(evt);
-    if (id) {
-      this.onTouchCancel({ id });
+    const id = event.pointerId;
+    if (this.touches.has(id)) {
       delete this.touches[id];
-      this.uuids.delete(evt);
+      this.onTouchCancel({ id });
     }
   }
 }
