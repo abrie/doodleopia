@@ -1,7 +1,7 @@
 import TouchList from "./TouchList.js";
 import Polylines from "./Polylines.js";
 import Paths from "./Paths.js";
-import PointTransformer from "./PointTransformer.js";
+import Canvas from "./Canvas.js";
 import radialSimplify from "./algorithms/RadialDistance.js";
 import rdpSimplify from "./algorithms/RamerDouglasPeucker.js";
 import simplify from "./algorithms/PassThrough.js";
@@ -14,7 +14,6 @@ const clientId = uuidv4();
 const workingCanvas = document.getElementById("working");
 const finishedCanvas = document.getElementById("finished");
 const cursorCanvas = document.getElementById("cursors");
-const transformPoint = new PointTransformer(workingCanvas);
 
 const messages = new Messages({
   onOpen: () => console.log("connection open"),
@@ -71,44 +70,53 @@ const remotePaths = new Paths({
   pathProcessor: (arr) => rdpSimplify(arr, 2),
 });
 
+const canvas = new Canvas({
+  target: document.getElementById("canvas"),
+  canvas: document.getElementById("working"),
+  onPointerDown: ({ id, data }) => touches.down({ id, data }),
+  onPointerUp: ({ id, data }) => touches.up({ id, data }),
+  onPointerMove: ({ id, data }) => touches.move({ id, data }),
+  onPointerCancel: ({ id }) => touches.cancel({ id }),
+});
+
 const touches = new TouchList({
   onTouchDown: ({ id, data }) => {
-    localPaths.startPath({ id, data: transformPoint(data) });
+    localPaths.startPath({ id, data });
     messages.send({
       action: "down",
       clientId,
       id,
-      data: transformPoint(data),
+      data,
     });
   },
   onTouchUp: ({ id, data }) => {
-    localPaths.finishPath({ id, data: transformPoint(data) });
+    localPaths.finishPath({ id, data });
     messages.send({
       action: "up",
       clientId,
       id,
-      data: transformPoint(data),
+      data,
     });
   },
   onTouchMove: ({ id, data }) => {
-    localPaths.updatePath({ id, data: transformPoint(data) });
+    localPaths.updatePath({ id, data });
     messages.send({
       action: "move",
       clientId,
       id,
-      data: transformPoint(data),
+      data,
     });
     messages.send({
       action: "cursor",
       clientId,
-      data: transformPoint(data),
+      data,
     });
   },
   onTouchHover: ({ id, data }) => {
     messages.send({
       action: "cursor",
       clientId,
-      data: transformPoint(data),
+      data,
     });
   },
   onTouchCancel: ({ id }) => {
@@ -155,56 +163,6 @@ function store() {
     .then(() => console.log("stored"))
     .catch((err) => console.error(err));
 }
-
-function stopPrevent(evt) {
-  evt.stopPropagation();
-  evt.preventDefault();
-}
-
-canvas.addEventListener(
-  "pointerdown",
-  (evt) => {
-    stopPrevent(evt);
-    touches.down(evt);
-  },
-  false
-);
-
-canvas.addEventListener(
-  "pointerup",
-  (evt) => {
-    stopPrevent(evt);
-    touches.up(evt);
-  },
-  false
-);
-
-document.addEventListener(
-  "pointerup",
-  (evt) => {
-    stopPrevent(evt);
-    touches.up(evt);
-  },
-  false
-);
-
-canvas.addEventListener(
-  "pointercancel",
-  (evt) => {
-    stopPrevent(evt);
-    touches.cancel(evt);
-  },
-  false
-);
-
-canvas.addEventListener(
-  "pointermove",
-  (evt) => {
-    stopPrevent(evt);
-    touches.move(evt);
-  },
-  false
-);
 
 document.getElementById("send-button").addEventListener("click", () => store());
 
