@@ -191,8 +191,12 @@ document.addEventListener("keyup", (event) => {
     lsystem.run(cursor, programs["koch"]);
   }
   if (event.keyCode === 83) {
-    // 'k'
+    // 's'
     lsystem.run(cursor, programs["sierpinski"]);
+  }
+  if (event.keyCode === 70) {
+    // 'f'
+    lsystem.run(cursor, programs["fern"]);
   }
 });
 
@@ -228,4 +232,17 @@ lsystem
   .then((program) => {
     console.log("sierpinski generated.");
     programs["sierpinski"] = program;
+  });
+
+lsystem
+  .loadProgram({
+    axiom: "X",
+    rules: { X: "F+[[X]-X]-F[-FX]+X", F: "FF" },
+    angle: 25,
+    distance: 10,
+    iterations: 5,
+  })
+  .then((program) => {
+    console.log("fern generated.");
+    programs["fern"] = program;
   });

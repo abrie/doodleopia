@@ -7,6 +7,7 @@ class Generator {
     this.angle = angle;
     this.distance = distance;
     this.string = `${axiom}`;
+    this.stack = [];
   }
 
   iterate() {
@@ -34,6 +35,12 @@ class Generator {
           break;
         case "-":
           yield () => turtle.turn(this.angle * -1);
+          break;
+        case "[":
+          yield () => this.stack.push(turtle.state);
+          break;
+        case "]":
+          yield () => (turtle.state = this.stack.pop());
           break;
         default:
           yield () => {};

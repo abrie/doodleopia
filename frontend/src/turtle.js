@@ -24,9 +24,7 @@ export default class Turtle {
   move([x, y]) {
     this.x = x;
     this.y = y;
-    if (this.isDown) {
-      this.onTurtleMove({ id: this.id, data: [this.x, this.y] });
-    }
+    this.onTurtleMove({ id: this.id, data: [this.x, this.y] });
   }
 
   turn(deg) {
@@ -39,5 +37,14 @@ export default class Turtle {
     if (this.isDown) {
       this.onTurtleMove({ id: this.id, data: [this.x, this.y] });
     }
+  }
+
+  get state() {
+    return { position: [this.x, this.y], theta: this.theta };
+  }
+
+  set state({ position, theta }) {
+    this.theta = theta;
+    this.move(position);
   }
 }
