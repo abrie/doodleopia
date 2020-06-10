@@ -16,6 +16,18 @@ const workingCanvas = document.getElementById("working");
 const finishedCanvas = document.getElementById("finished");
 const cursorCanvas = document.getElementById("cursors");
 
+document
+  .getElementById("zoom")
+  .addEventListener("input", (evt) => zoom(evt.target.value));
+
+const zoom = (f) => {
+  const width = 1600 * f;
+  const height = 900 * f;
+  workingCanvas.setAttribute("viewBox", `0 0 ${width} ${height}`);
+  finishedCanvas.setAttribute("viewBox", `0 0 ${width} ${height}`);
+  cursorCanvas.setAttribute("viewBox", `0 0 ${width} ${height}`);
+};
+
 const messages = new Messages({
   onOpen: () => {
     console.log("connection open");

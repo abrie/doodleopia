@@ -38,8 +38,10 @@ export default class TouchList {
   }
 
   up({ id, data }) {
-    this.downTracker.delete(id);
-    this.onTouchUp({ id, data });
+    if (this.downTracker.has(id)) {
+      this.downTracker.delete(id);
+      this.onTouchUp({ id, data });
+    }
   }
 
   move({ id, data }) {
