@@ -13,7 +13,6 @@ import LSystem from "./l-system.js";
 const workingCanvas = document.getElementById("working");
 const finishedCanvas = document.getElementById("finished");
 const cursorCanvas = document.getElementById("cursors");
-var cursor = [0, 0];
 const programs = {};
 
 document

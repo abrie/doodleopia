@@ -3,6 +3,15 @@ export default class {
     this.onNewCursor = onNewCursor;
     this.onDeadCursor = onDeadCursor;
     this.cursors = {};
+    this.localCursor = [0, 0];
+  }
+
+  get local() {
+    return this.localCursor;
+  }
+
+  set local([x, y]) {
+    this.localCursor = [x, y];
   }
 
   updateCursor(clientId, [x, y]) {
