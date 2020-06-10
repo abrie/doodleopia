@@ -9,9 +9,7 @@ import callService from "./service.js";
 import Messages from "./messages.js";
 import Cursors from "./Cursors.js";
 import LSystem from "./l-system.js";
-import { v4 as uuidv4 } from "uuid";
 
-const clientId = uuidv4();
 const workingCanvas = document.getElementById("working");
 const finishedCanvas = document.getElementById("finished");
 const cursorCanvas = document.getElementById("cursors");
@@ -31,12 +29,10 @@ const zoom = (f) => {
 };
 
 const messages = new Messages({
-  onOpen: () => {
-    console.log("connection open");
-  },
+  onOpen: () => console.log("connection open"),
   onClose: () => console.log("connection closed"),
-  onMessage: (message) => processMessage(message),
   onError: () => console.log("connection error"),
+  onMessage: (message) => processMessage(message),
 });
 
 const cursors = new Cursors({
@@ -101,7 +97,6 @@ const touches = new Touches({
     localPaths.startPath({ id, data });
     messages.send({
       action: "down",
-      clientId,
       id,
       data,
     });
@@ -110,7 +105,6 @@ const touches = new Touches({
     localPaths.finishPath({ id, data });
     messages.send({
       action: "up",
-      clientId,
       id,
       data,
     });
@@ -119,13 +113,11 @@ const touches = new Touches({
     localPaths.updatePath({ id, data });
     messages.send({
       action: "move",
-      clientId,
       id,
       data,
     });
     messages.send({
       action: "cursor",
-      clientId,
       data,
     });
   },
@@ -133,21 +125,16 @@ const touches = new Touches({
     cursor = [...data];
     messages.send({
       action: "cursor",
-      clientId,
       data,
     });
   },
   onTouchCancel: ({ id }) => {
     localPaths.cancelPath({ id });
-    messages.send({ action: "cancel", clientId, id });
+    messages.send({ action: "cancel", id });
   },
 });
 
-function processMessage({ clientId: remoteId, action, id, data }) {
-  if (clientId == remoteId) {
-    return;
-  }
-
+function processMessage({ clientId, action, id, data }) {
   switch (action) {
     case "down":
       remotePaths.startPath({ id, data });
@@ -162,7 +149,7 @@ function processMessage({ clientId: remoteId, action, id, data }) {
       remotePaths.cancelPath({ id });
       break;
     case "cursor":
-      cursors.updateCursor(remoteId, data);
+      cursors.updateCursor(clientId, data);
       break;
     default:
       console.log(`Unknown message action: ${action}`);

@@ -1,9 +1,12 @@
+import { v4 as uuidv4 } from "uuid";
+
 export default class {
   constructor({ onMessage, onClose, onError, onOpen }) {
     this.onMessage = onMessage;
     this.onClose = onClose;
     this.onError = onError;
     this.onOpen = onOpen;
+    this.clientId = uuidv4();
   }
 
   get url() {
@@ -22,13 +25,16 @@ export default class {
   receive(data) {
     if (this.onMessage) {
       const messages = deserializeData(data);
-      messages.forEach((message) => this.onMessage(message));
+      messages
+        .filter((message) => message.clientId != this.clientId)
+        .forEach((message) => this.onMessage(message));
     }
   }
 
   send(data) {
     if (this.conn) {
-      this.conn.send(serializeData(data));
+      const message = { ...data, clientId: this.clientId };
+      this.conn.send(serializeData(message));
     }
   }
 }
