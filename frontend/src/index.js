@@ -2,19 +2,21 @@ import Touches from "./Touches.js";
 import Polylines from "./Polylines.js";
 import Paths from "./Paths.js";
 import Canvas from "./Canvas.js";
-import Turtle from "./turtle.js";
 import radialSimplify from "./algorithms/RadialDistance.js";
 import rdpSimplify from "./algorithms/RamerDouglasPeucker.js";
 import simplify from "./algorithms/PassThrough.js";
 import callService from "./service.js";
 import Messages from "./messages.js";
 import Cursors from "./Cursors.js";
+import LSystem from "./l-system.js";
 import { v4 as uuidv4 } from "uuid";
 
 const clientId = uuidv4();
 const workingCanvas = document.getElementById("working");
 const finishedCanvas = document.getElementById("finished");
 const cursorCanvas = document.getElementById("cursors");
+var cursor = [0, 0];
+const programs = {};
 
 document
   .getElementById("zoom")
@@ -31,7 +33,6 @@ const zoom = (f) => {
 const messages = new Messages({
   onOpen: () => {
     console.log("connection open");
-    startProgram();
   },
   onClose: () => console.log("connection closed"),
   onMessage: (message) => processMessage(message),
@@ -95,12 +96,6 @@ const canvas = new Canvas({
   onPointerCancel: ({ id }) => touches.cancel({ id }),
 });
 
-const turtle = new Turtle({
-  onTurtleDown: ({ id, data }) => touches.down({ id, data }),
-  onTurtleMove: ({ id, data }) => touches.move({ id, data }),
-  onTurtleUp: ({ id, data }) => touches.up({ id, data }),
-});
-
 const touches = new Touches({
   onTouchDown: ({ id, data }) => {
     localPaths.startPath({ id, data });
@@ -135,6 +130,7 @@ const touches = new Touches({
     });
   },
   onTouchHover: ({ id, data }) => {
+    cursor = [...data];
     messages.send({
       action: "cursor",
       clientId,
@@ -188,14 +184,24 @@ function store() {
 
 document.getElementById("send-button").addEventListener("click", () => store());
 
+document.addEventListener("keyup", (event) => {
+  if (event.keyCode === 75) {
+    // 'k'
+    lsystem.run(cursor, programs["koch"]);
+  }
+});
+
 messages.open();
 
-function startProgram() {
-  turtle.down();
-  turtle.turn(45);
-  for (let step = 0; step < 100; step++) {
-    turtle.forward(Math.random() * 20);
-    turtle.turn(Math.random() * 10 - 5);
-  }
-  turtle.up();
-}
+const lsystem = new LSystem({
+  onTurtleDown: ({ id, data }) => touches.down({ id, data }),
+  onTurtleMove: ({ id, data }) => touches.move({ id, data }),
+  onTurtleUp: ({ id, data }) => touches.up({ id, data }),
+});
+
+lsystem
+  .loadProgram({ axiom: "F+F--F+F", rules: { F: "F+F--F+F" }, iterations: 3 })
+  .then((program) => {
+    console.log("program generated.");
+    programs["koch"] = program;
+  });
