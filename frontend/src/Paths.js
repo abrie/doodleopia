@@ -26,7 +26,7 @@ export default class Paths {
   updatePath({ id, data }) {
     if (this.paths[id]) {
       this.paths[id].raw.push(data);
-      this.paths[id].data = this.paths[id].raw.map(this.pathProcessor);
+      this.paths[id].data = this.pathProcessor(this.paths[id].raw);
       this.onUpdatedPath(this.paths[id]);
     }
   }

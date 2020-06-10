@@ -63,7 +63,7 @@ const localPaths = new Paths({
   onCanceledPath: ({ id }) => {
     polylines.cancelPolyline({ id });
   },
-  pathProcessor: (arr) => rdpSimplify(arr, 2),
+  pathProcessor: (arr) => rdpSimplify(arr, 1),
 });
 
 const remotePaths = new Paths({
@@ -121,7 +121,7 @@ const touches = new Touches({
     });
   },
   onTouchHover: ({ id, data }) => {
-    cursor = [...data];
+    cursors.local = data;
     messages.send({
       action: "cursor",
       data,
@@ -174,15 +174,15 @@ document.addEventListener("keyup", (event) => {
   console.log(event.keyCode);
   if (event.keyCode === 75) {
     // 'k'
-    lsystem.run(cursor, programs["koch"]);
+    lsystem.run(cursors.local, programs["koch"]);
   }
   if (event.keyCode === 83) {
     // 's'
-    lsystem.run(cursor, programs["sierpinski"]);
+    lsystem.run(cursors.local, programs["sierpinski"]);
   }
   if (event.keyCode === 70) {
     // 'f'
-    lsystem.run(cursor, programs["fern"]);
+    lsystem.run(cursors.local, programs["fern"]);
   }
 });
 
