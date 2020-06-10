@@ -2,6 +2,7 @@ import Touches from "./Touches.js";
 import Polylines from "./Polylines.js";
 import Paths from "./Paths.js";
 import Canvas from "./Canvas.js";
+import Turtle from "./turtle.js";
 import radialSimplify from "./algorithms/RadialDistance.js";
 import rdpSimplify from "./algorithms/RamerDouglasPeucker.js";
 import simplify from "./algorithms/PassThrough.js";
@@ -16,7 +17,10 @@ const finishedCanvas = document.getElementById("finished");
 const cursorCanvas = document.getElementById("cursors");
 
 const messages = new Messages({
-  onOpen: () => console.log("connection open"),
+  onOpen: () => {
+    console.log("connection open");
+    startProgram();
+  },
   onClose: () => console.log("connection closed"),
   onMessage: (message) => processMessage(message),
   onError: () => console.log("connection error"),
@@ -77,6 +81,12 @@ const canvas = new Canvas({
   onPointerUp: ({ id, data }) => touches.up({ id, data }),
   onPointerMove: ({ id, data }) => touches.move({ id, data }),
   onPointerCancel: ({ id }) => touches.cancel({ id }),
+});
+
+const turtle = new Turtle({
+  onTurtleDown: ({ id, data }) => touches.down({ id, data }),
+  onTurtleMove: ({ id, data }) => touches.move({ id, data }),
+  onTurtleUp: ({ id, data }) => touches.up({ id, data }),
 });
 
 const touches = new Touches({
@@ -167,3 +177,13 @@ function store() {
 document.getElementById("send-button").addEventListener("click", () => store());
 
 messages.open();
+
+function startProgram() {
+  turtle.down();
+  turtle.turn(45);
+  for (let step = 0; step < 100; step++) {
+    turtle.forward(Math.random() * 20);
+    turtle.turn(Math.random() * 10 - 5);
+  }
+  turtle.up();
+}
