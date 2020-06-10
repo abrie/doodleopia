@@ -19,7 +19,7 @@ func GetHandler(hub *Hub) http.HandlerFunc {
 			return
 		}
 
-		client := &Client{hub: hub, conn: conn, send: make(chan []byte, 256)}
+		client := &Client{hub: hub, conn: conn, send: make(chan []byte, 1028)}
 		client.hub.register <- client
 
 		go client.writePump()
