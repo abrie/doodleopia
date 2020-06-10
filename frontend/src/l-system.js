@@ -1,9 +1,11 @@
 import Turtle from "./turtle.js";
 
 class Generator {
-  constructor({ axiom, rules }) {
+  constructor({ axiom, rules, angle, distance }) {
     this.axiom = axiom;
     this.rules = rules;
+    this.angle = angle;
+    this.distance = distance;
     this.string = `${axiom}`;
   }
 
@@ -18,17 +20,20 @@ class Generator {
     return this.string;
   }
 
-  *actions(turtle, angle, distance) {
+  *actions(turtle) {
     for (var idx = 0; idx < this.string.length; idx++) {
       switch (this.string[idx]) {
         case "F":
-          yield () => turtle.forward(distance);
+          yield () => turtle.forward(this.distance);
+          break;
+        case "G":
+          yield () => turtle.forward(this.distance);
           break;
         case "+":
-          yield () => turtle.turn(angle);
+          yield () => turtle.turn(this.angle);
           break;
         case "-":
-          yield () => turtle.turn(-angle);
+          yield () => turtle.turn(this.angle * -1);
           break;
         default:
           yield () => {};
@@ -46,9 +51,9 @@ export default class {
     });
   }
 
-  loadProgram({ axiom, rules, iterations, angle }) {
+  loadProgram({ axiom, rules, iterations, angle, distance }) {
     return new Promise((resolve, reject) => {
-      const generator = new Generator({ axiom, rules });
+      const generator = new Generator({ axiom, rules, angle, distance });
       for (var i = 0; i < iterations; i++) {
         generator.iterate();
       }
@@ -59,7 +64,7 @@ export default class {
   run(point, generator) {
     this.turtle.move(point);
     this.turtle.down();
-    for (let action of generator.actions(this.turtle, 60, 2)) {
+    for (let action of generator.actions(this.turtle)) {
       action();
     }
     this.turtle.up();

@@ -185,9 +185,14 @@ function store() {
 document.getElementById("send-button").addEventListener("click", () => store());
 
 document.addEventListener("keyup", (event) => {
+  console.log(event.keyCode);
   if (event.keyCode === 75) {
     // 'k'
     lsystem.run(cursor, programs["koch"]);
+  }
+  if (event.keyCode === 83) {
+    // 'k'
+    lsystem.run(cursor, programs["sierpinski"]);
   }
 });
 
@@ -200,8 +205,27 @@ const lsystem = new LSystem({
 });
 
 lsystem
-  .loadProgram({ axiom: "F+F--F+F", rules: { F: "F+F--F+F" }, iterations: 3 })
+  .loadProgram({
+    axiom: "F+F--F+F",
+    rules: { F: "F+F--F+F" },
+    angle: 60,
+    distance: 2,
+    iterations: 3,
+  })
   .then((program) => {
-    console.log("program generated.");
+    console.log("koch generated.");
     programs["koch"] = program;
+  });
+
+lsystem
+  .loadProgram({
+    axiom: "F-G-G",
+    rules: { F: "F-G+F+G-F", G: "GG" },
+    angle: 120,
+    distance: 20,
+    iterations: 5,
+  })
+  .then((program) => {
+    console.log("sierpinski generated.");
+    programs["sierpinski"] = program;
   });
