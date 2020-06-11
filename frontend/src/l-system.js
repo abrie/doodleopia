@@ -25,8 +25,6 @@ class Generator {
     for (var idx = 0; idx < this.string.length; idx++) {
       switch (this.string[idx]) {
         case "F":
-          yield () => turtle.forward(this.distance);
-          break;
         case "G":
           yield () => turtle.forward(this.distance);
           break;

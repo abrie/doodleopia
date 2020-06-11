@@ -10,9 +10,6 @@ import Messages from "./messages.js";
 import Cursors from "./Cursors.js";
 import LSystem from "./l-system.js";
 
-const workingCanvas = document.getElementById("working");
-const finishedCanvas = document.getElementById("finished");
-const cursorCanvas = document.getElementById("cursors");
 const programs = {};
 
 document
@@ -30,19 +27,14 @@ const messages = new Messages({
 });
 
 const cursors = new Cursors({
-  onNewCursor: (cursor) => canvas.cursorCanvas.appendChild(cursor),
-  onDeadCursor: (cursor) => canvas.cursorCanvas.removeChild(cursor),
+  onNewCursor: (cursor) => canvas.addCursor(cursor),
+  onDeadCursor: (cursor) => canvas.removeCursor(cursor),
 });
 
 const polylines = new Polylines({
-  onNewPolyline: (polyline) => canvas.workingCanvas.appendChild(polyline),
-  onFinishedPolyline: ({ original, finished }) => {
-    canvas.workingCanvas.removeChild(original);
-    canvas.finishedCanvas.appendChild(finished);
-  },
-  onCanceledPolyline: ({ canceled }) => {
-    canvas.workingCanvas.removeChild(canceled);
-  },
+  onNewPolyline: (polyline) => canvas.startPolyline(polyline),
+  onFinishedPolyline: (polyline) => canvas.finishPolyline(polyline),
+  onCanceledPolyline: (polyline) => canvas.cancelPolyline(polyline),
 });
 
 const localPaths = new Paths({

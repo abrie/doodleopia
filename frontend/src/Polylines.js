@@ -13,9 +13,8 @@ export default class Polylines {
   }
 
   finishPolyline({ id, data }) {
-    const finished = new Polyline();
-    finished.setAttributeNS(null, "points", data.map(coordToString));
-    this.onFinishedPolyline({ original: this.polylines[id], finished });
+    const polyline = this.polylines[id];
+    this.onFinishedPolyline(polyline);
     delete this.polylines[id];
   }
 
@@ -24,7 +23,8 @@ export default class Polylines {
   }
 
   cancelPolyline({ id }) {
-    this.onCancelPolyline({ canceled: this.polylines[id] });
+    const polyline = this.polylines[id];
+    this.onCancelPolyline(polyline);
     delete this.polylines[id];
   }
 

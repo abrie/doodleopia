@@ -1,4 +1,4 @@
-import { CoordinateTransformer } from "./coordinates";
+import { CoordinateTransformer } from "../coordinates";
 
 function stopPrevent(evt) {
   evt.stopPropagation();

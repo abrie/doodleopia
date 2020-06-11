@@ -1,4 +1,4 @@
-import { SVGCoordinateTransformer } from "./coordinates";
+import { SVGCoordinateTransformer } from "../coordinates";
 import {
   PointerEventHandlers,
   attachPointerEventHandlers,
@@ -6,10 +6,11 @@ import {
 import { createSvgElement, setSvgViewBox } from "./svg";
 
 interface CanvasInterface {
-  workingCanvas: SVGSVGElement;
-  finishedCanvas: SVGSVGElement;
-  cursorCanvas: SVGSVGElement;
-  zoomFactor: Number;
+  startPolyline: (element: SVGElement) => void;
+  finishPolyline: (element: SVGElement) => void;
+  cancelPolyline: (element: SVGElement) => void;
+  addCursor: (element: SVGElement) => void;
+  removeCursor: (element: SVGElement) => void;
 }
 
 interface CanvasConstructorParams {
@@ -37,6 +38,27 @@ export default class Canvas implements CanvasInterface {
       pointerEventHandlers,
       SVGCoordinateTransformer(this.workingCanvas)
     );
+  }
+
+  startPolyline(el: SVGElement): void {
+    this.workingCanvas.appendChild(el);
+  }
+
+  finishPolyline(el: SVGElement): void {
+    this.workingCanvas.removeChild(el);
+    this.finishedCanvas.appendChild(el);
+  }
+
+  cancelPolyline(el: SVGElement): void {
+    this.workingCanvas.removeChild(el);
+  }
+
+  addCursor(el: SVGElement): void {
+    this.cursorCanvas.appendChild(el);
+  }
+
+  removeCursor(el: SVGElement): void {
+    this.cursorCanvas.removeChild(el);
   }
 
   set zoom(f) {
