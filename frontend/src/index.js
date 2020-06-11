@@ -1,4 +1,4 @@
-import Touches from "./Touches.js";
+import TouchTracker, { TouchTrackerEventHandler } from "./touchTracker";
 import Polylines from "./Polylines.js";
 import Paths from "./Paths.js";
 import Canvas from "./canvas";
@@ -70,10 +70,10 @@ const remotePaths = new Paths({
 });
 
 const pointerEventHandlers = {
-  onPointerDown: ({ id, data }) => touches.down({ id, data }),
-  onPointerUp: ({ id, data }) => touches.up({ id, data }),
-  onPointerMove: ({ id, data }) => touches.move({ id, data }),
-  onPointerCancel: ({ id }) => touches.cancel({ id }),
+  onPointerDown: ({ id, data }) => touchTracker.down({ id, data }),
+  onPointerUp: ({ id, data }) => touchTracker.up({ id, data }),
+  onPointerMove: ({ id, data }) => touchTracker.move({ id, data }),
+  onPointerCancel: ({ id }) => touchTracker.cancel({ id }),
 };
 
 const canvas = new Canvas({
@@ -81,7 +81,7 @@ const canvas = new Canvas({
   pointerEventHandlers,
 });
 
-const touches = new Touches({
+const touchTrackerEventHandler: TouchTrackerEventHandler = {
   onTouchDown: ({ id, data }) => {
     localPaths.startPath({ id, data });
     messages.send({
@@ -121,7 +121,9 @@ const touches = new Touches({
     localPaths.cancelPath({ id });
     messages.send({ action: "cancel", id });
   },
-});
+};
+
+const touchTracker = new TouchTracker(touchTrackerEventHandlers);
 
 function processMessage({ clientId, action, id, data }) {
   switch (action) {
@@ -179,9 +181,9 @@ document.addEventListener("keyup", (event) => {
 messages.open();
 
 const lsystem = new LSystem({
-  onTurtleDown: ({ id, data }) => touches.down({ id, data }),
-  onTurtleMove: ({ id, data }) => touches.move({ id, data }),
-  onTurtleUp: ({ id, data }) => touches.up({ id, data }),
+  onTurtleDown: ({ id, data }) => touchTracker.down({ id, data }),
+  onTurtleMove: ({ id, data }) => touchTracker.move({ id, data }),
+  onTurtleUp: ({ id, data }) => touchTracker.up({ id, data }),
 });
 
 lsystem
