@@ -17,9 +17,10 @@ const programs = {};
 
 document
   .getElementById("zoom")
-  .addEventListener("input", (evt) => zoom(evt.target.value));
+  .addEventListener("input", (evt) => zoom(parseFloat(evt.target.value)));
 
-const zoom = (f) => {
+const zoom = (val) => {
+  const f = parseFloat(val);
   const width = 1600 * f;
   const height = 900 * f;
   workingCanvas.setAttribute("viewBox", `0 0 ${width} ${height}`);

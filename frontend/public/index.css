@@ -20,6 +20,14 @@ h1 {
   border-radius: 5px 5px 0px 0px;
 }
 
+#controls {
+  width: 80%;
+}
+
+#zoom {
+  width: 100%;
+}
+
 #app {
   display: flex;
   flex-flow: column nowrap;
