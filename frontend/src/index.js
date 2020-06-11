@@ -17,16 +17,10 @@ const programs = {};
 
 document
   .getElementById("zoom")
-  .addEventListener("input", (evt) => zoom(parseFloat(evt.target.value)));
-
-const zoom = (val) => {
-  const f = parseFloat(val);
-  const width = 1600 * f;
-  const height = 900 * f;
-  workingCanvas.setAttribute("viewBox", `0 0 ${width} ${height}`);
-  finishedCanvas.setAttribute("viewBox", `0 0 ${width} ${height}`);
-  cursorCanvas.setAttribute("viewBox", `0 0 ${width} ${height}`);
-};
+  .addEventListener(
+    "input",
+    (evt) => (canvas.zoom = parseFloat(evt.target.value))
+  );
 
 const messages = new Messages({
   onOpen: () => console.log("connection open"),
@@ -36,18 +30,18 @@ const messages = new Messages({
 });
 
 const cursors = new Cursors({
-  onNewCursor: (cursor) => cursorCanvas.appendChild(cursor),
-  onDeadCursor: (cursor) => cursorCanvas.removeChild(cursor),
+  onNewCursor: (cursor) => canvas.cursorCanvas.appendChild(cursor),
+  onDeadCursor: (cursor) => canvas.cursorCanvas.removeChild(cursor),
 });
 
 const polylines = new Polylines({
-  onNewPolyline: (polyline) => workingCanvas.appendChild(polyline),
+  onNewPolyline: (polyline) => canvas.workingCanvas.appendChild(polyline),
   onFinishedPolyline: ({ original, finished }) => {
-    workingCanvas.removeChild(original);
-    finishedCanvas.appendChild(finished);
+    canvas.workingCanvas.removeChild(original);
+    canvas.finishedCanvas.appendChild(finished);
   },
   onCanceledPolyline: ({ canceled }) => {
-    workingCanvas.removeChild(canceled);
+    canvas.workingCanvas.removeChild(canceled);
   },
 });
 
@@ -83,13 +77,16 @@ const remotePaths = new Paths({
   pathProcessor: (arr) => rdpSimplify(arr, 2),
 });
 
-const canvas = new Canvas({
-  target: document.getElementById("canvas"),
-  canvas: document.getElementById("working"),
+const pointerEventHandlers = {
   onPointerDown: ({ id, data }) => touches.down({ id, data }),
   onPointerUp: ({ id, data }) => touches.up({ id, data }),
   onPointerMove: ({ id, data }) => touches.move({ id, data }),
   onPointerCancel: ({ id }) => touches.cancel({ id }),
+};
+
+const canvas = new Canvas({
+  target: document.getElementById("canvas"),
+  pointerEventHandlers,
 });
 
 const touches = new Touches({

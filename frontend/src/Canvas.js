@@ -17,19 +17,38 @@ function eventCoordinates(evt) {
   return [evt.clientX, evt.clientY];
 }
 
+function setSvgViewBox(svg, top, left, width, height) {
+  svg.setAttribute("viewBox", `${top} ${left} ${width} ${height}`);
+}
+
+function createSvgElement(width, height) {
+  const element = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  setSvgViewBox(element, 0, 0, width, height);
+  return element;
+}
+
 export default class Canvas {
-  constructor({
-    target,
-    canvas,
+  constructor({ target, pointerEventHandlers }) {
+    this.workingCanvas = createSvgElement(1600, 900);
+    this.finishedCanvas = createSvgElement(1600, 900);
+    this.cursorCanvas = createSvgElement(1600, 900);
+
+    this.transformCoordinates = new PointTransformer(this.workingCanvas);
+
+    this.target = target;
+    target.appendChild(this.workingCanvas);
+    target.appendChild(this.finishedCanvas);
+    target.appendChild(this.cursorCanvas);
+
+    this.attachPointerEventHandlers(pointerEventHandlers);
+  }
+
+  attachPointerEventHandlers({
     onPointerDown,
     onPointerUp,
     onPointerMove,
     onPointerCancel,
   }) {
-    this.target = target;
-    this.canvas = canvas;
-    this.transformCoordinates = new PointTransformer(this.canvas);
-
     this.target.addEventListener(
       "pointerdown",
       (evt) => {
@@ -83,5 +102,18 @@ export default class Canvas {
       },
       false
     );
+  }
+
+  set zoom(f) {
+    this.zoomFactor = f;
+    const width = 1600 * f;
+    const height = 900 * f;
+    setSvgViewBox(this.workingCanvas, 0, 0, width, height);
+    setSvgViewBox(this.finishedCanvas, 0, 0, width, height);
+    setSvgViewBox(this.cursorCanvas, 0, 0, width, height);
+  }
+
+  get zoom() {
+    return this.zoomFactor;
   }
 }
