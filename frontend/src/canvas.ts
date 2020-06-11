@@ -1,10 +1,12 @@
-function PointTransformer(svg) {
+type Coordinate = [number, number];
+type CoordinateTransformer = (Coordinate) => Coordinate;
+function SVGCoordinateTransformer(svg: SVGSVGElement): CoordinateTransformer {
   const point = svg.createSVGPoint();
 
-  return ([x, y]) => {
+  return ([x, y]: Coordinate) => {
     [point.x, point.y] = [x, y];
     const transformed = point.matrixTransform(svg.getScreenCTM().inverse());
-    return [transformed.x, transformed.y];
+    return <Coordinate>[transformed.x, transformed.y];
   };
 }
 
@@ -21,51 +23,80 @@ function setSvgViewBox(svg, top, left, width, height) {
   svg.setAttribute("viewBox", `${top} ${left} ${width} ${height}`);
 }
 
-function createSvgElement(width, height) {
+function createSvgElement(width: number, height: number): SVGSVGElement {
   const element = document.createElementNS("http://www.w3.org/2000/svg", "svg");
   setSvgViewBox(element, 0, 0, width, height);
   return element;
 }
 
-export default class Canvas {
-  constructor({ target, pointerEventHandlers }) {
+interface CanvasInterface {
+  workingCanvas: SVGSVGElement;
+  finishedCanvas: SVGSVGElement;
+  cursorCanvas: SVGSVGElement;
+  zoomFactor: Number;
+}
+
+interface CanvasConstructorParams {
+  target: HTMLElement;
+  pointerEventHandlers: PointerEventHandlers;
+}
+
+interface PointerEventHandlers {
+  onPointerDown: ({ id: number, data: Coordinate }) => void;
+  onPointerUp: ({ id: number, data: Coordinate }) => void;
+  onPointerMove: ({ id: number, data: Coordinate }) => void;
+  onPointerCancel: ({ id: number }) => void;
+}
+
+export default class Canvas implements CanvasInterface {
+  workingCanvas: SVGSVGElement = undefined;
+  finishedCanvas: SVGSVGElement = undefined;
+  cursorCanvas: SVGSVGElement = undefined;
+  zoomFactor: number;
+
+  constructor({ target, pointerEventHandlers }: CanvasConstructorParams) {
     this.workingCanvas = createSvgElement(1600, 900);
     this.finishedCanvas = createSvgElement(1600, 900);
     this.cursorCanvas = createSvgElement(1600, 900);
 
-    this.transformCoordinates = new PointTransformer(this.workingCanvas);
-
-    this.target = target;
     target.appendChild(this.workingCanvas);
     target.appendChild(this.finishedCanvas);
     target.appendChild(this.cursorCanvas);
 
-    this.attachPointerEventHandlers(pointerEventHandlers);
+    this.attachPointerEventHandlers(
+      target,
+      pointerEventHandlers,
+      SVGCoordinateTransformer(this.workingCanvas)
+    );
   }
 
-  attachPointerEventHandlers({
-    onPointerDown,
-    onPointerUp,
-    onPointerMove,
-    onPointerCancel,
-  }) {
-    this.target.addEventListener(
+  attachPointerEventHandlers(
+    target: HTMLElement,
+    {
+      onPointerDown,
+      onPointerUp,
+      onPointerMove,
+      onPointerCancel,
+    }: PointerEventHandlers,
+    transformCoordinates: CoordinateTransformer
+  ) {
+    target.addEventListener(
       "pointerdown",
       (evt) => {
         stopPrevent(evt);
         const { pointerId: id } = evt;
-        const data = this.transformCoordinates(eventCoordinates(evt));
+        const data = transformCoordinates(eventCoordinates(evt));
         onPointerDown({ id, data });
       },
       false
     );
 
-    this.target.addEventListener(
+    target.addEventListener(
       "pointerup",
       (evt) => {
         stopPrevent(evt);
         const { pointerId: id } = evt;
-        const data = this.transformCoordinates(eventCoordinates(evt));
+        const data = transformCoordinates(eventCoordinates(evt));
         onPointerUp({ id, data });
       },
       false
@@ -76,13 +107,13 @@ export default class Canvas {
       (evt) => {
         stopPrevent(evt);
         const { pointerId: id } = evt;
-        const data = this.transformCoordinates(eventCoordinates(evt));
+        const data = transformCoordinates(eventCoordinates(evt));
         onPointerUp({ id, data });
       },
       false
     );
 
-    this.target.addEventListener(
+    target.addEventListener(
       "pointercancel",
       (evt) => {
         stopPrevent(evt);
@@ -92,12 +123,12 @@ export default class Canvas {
       false
     );
 
-    this.target.addEventListener(
+    target.addEventListener(
       "pointermove",
       (evt) => {
         stopPrevent(evt);
         const { pointerId: id } = evt;
-        const data = this.transformCoordinates(eventCoordinates(evt));
+        const data = transformCoordinates(eventCoordinates(evt));
         onPointerMove({ id, data });
       },
       false

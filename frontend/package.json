@@ -14,9 +14,11 @@
     "@babel/core": "^7.10.2",
     "@babel/plugin-proposal-throw-expressions": "^7.10.1",
     "@babel/preset-env": "^7.10.2",
+    "@babel/preset-typescript": "^7.10.1",
     "@snowpack/plugin-babel": "^1.0.0",
     "@snowpack/plugin-webpack": "^1.1.0",
     "prettier": "^2.0.0",
-    "snowpack": "^2.0.0"
+    "snowpack": "^2.0.0",
+    "typescript": "^3.9.5"
   }
 }
