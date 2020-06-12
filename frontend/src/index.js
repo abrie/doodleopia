@@ -1,4 +1,4 @@
-import TouchTracker, { TouchTrackerEventHandler } from "./touchTracker";
+import PenTracker, { PenTrackerEventHandler } from "./penTracker";
 import Polylines from "./Polylines.js";
 import Paths from "./Paths.js";
 import Canvas from "./canvas";
@@ -66,14 +66,14 @@ const remotePaths = new Paths({
   onCanceledPath: ({ id }) => {
     polylines.cancelPolyline({ id });
   },
-  pathProcessor: (arr) => rdpSimplify(arr, 2),
+  pathProcessor: (arr) => rdpSimplify(arr, 1),
 });
 
 const pointerEventHandlers = {
-  onPointerDown: ({ id, data }) => touchTracker.down({ id, data }),
-  onPointerUp: ({ id, data }) => touchTracker.up({ id, data }),
-  onPointerMove: ({ id, data }) => touchTracker.move({ id, data }),
-  onPointerCancel: ({ id }) => touchTracker.cancel({ id }),
+  onPointerDown: ({ id, data }) => penTracker.down({ id, data }),
+  onPointerUp: ({ id, data }) => penTracker.up({ id, data }),
+  onPointerMove: ({ id, data }) => penTracker.move({ id, data }),
+  onPointerCancel: ({ id }) => penTracker.cancel({ id }),
 };
 
 const canvas = new Canvas({
@@ -81,8 +81,8 @@ const canvas = new Canvas({
   pointerEventHandlers,
 });
 
-const touchTrackerEventHandler: TouchTrackerEventHandler = {
-  onTouchDown: ({ id, data }) => {
+const penTrackerEventHandler: PenTrackerEventHandler = {
+  onPenDown: ({ id, data }) => {
     localPaths.startPath({ id, data });
     messages.send({
       action: "down",
@@ -90,7 +90,7 @@ const touchTrackerEventHandler: TouchTrackerEventHandler = {
       data,
     });
   },
-  onTouchUp: ({ id, data }) => {
+  onPenUp: ({ id, data }) => {
     localPaths.finishPath({ id, data });
     messages.send({
       action: "up",
@@ -98,7 +98,7 @@ const touchTrackerEventHandler: TouchTrackerEventHandler = {
       data,
     });
   },
-  onTouchMove: ({ id, data }) => {
+  onPenMove: ({ id, data }) => {
     localPaths.updatePath({ id, data });
     messages.send({
       action: "move",
@@ -110,20 +110,20 @@ const touchTrackerEventHandler: TouchTrackerEventHandler = {
       data,
     });
   },
-  onTouchHover: ({ id, data }) => {
+  onPenHover: ({ id, data }) => {
     cursors.local = data;
     messages.send({
       action: "cursor",
       data,
     });
   },
-  onTouchCancel: ({ id }) => {
+  onPenCancel: ({ id }) => {
     localPaths.cancelPath({ id });
     messages.send({ action: "cancel", id });
   },
 };
 
-const touchTracker = new TouchTracker(touchTrackerEventHandlers);
+const penTracker = new PenTracker(penTrackerEventHandlers);
 
 function processMessage({ clientId, action, id, data }) {
   switch (action) {
@@ -181,9 +181,9 @@ document.addEventListener("keyup", (event) => {
 messages.open();
 
 const lsystem = new LSystem({
-  onTurtleDown: ({ id, data }) => touchTracker.down({ id, data }),
-  onTurtleMove: ({ id, data }) => touchTracker.move({ id, data }),
-  onTurtleUp: ({ id, data }) => touchTracker.up({ id, data }),
+  onTurtleDown: ({ id, data }) => penTracker.down({ id, data }),
+  onTurtleMove: ({ id, data }) => penTracker.move({ id, data }),
+  onTurtleUp: ({ id, data }) => penTracker.up({ id, data }),
 });
 
 lsystem
