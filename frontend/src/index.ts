@@ -2,12 +2,10 @@ import Canvas from "./canvas";
 import CursorTracker, { CursorTrackerEventHandler } from "./cursorTracker";
 import PenTracker, { PenTrackerEventHandler } from "./penTracker";
 import Polylines from "./Polylines.js";
-import Paths from "./Paths.js";
-import radialSimplify from "./algorithms/RadialDistance.js";
-import rdpSimplify from "./algorithms/RamerDouglasPeucker.js";
-import simplify from "./algorithms/PassThrough.js";
+import PathTracker, { PathTrackerEventHandler } from "./pathtracker";
 import callService from "./service.js";
 import Messages, { MessagesEventHandler } from "./messages";
+import { pathProcessor } from "./pathprocessor";
 import LSystem from "./l-system.js";
 
 const programs = {};
@@ -41,7 +39,7 @@ const polylines = new Polylines({
   onCanceledPolyline: (polyline) => canvas.cancelPolyline(polyline),
 });
 
-const localPaths = new Paths({
+const localPathTrackerEventHandler: PathTrackerEventHandler = {
   onNewPath: ({ id, data }) => {
     polylines.startPolyline({ id, data });
   },
@@ -54,10 +52,14 @@ const localPaths = new Paths({
   onCanceledPath: ({ id }) => {
     polylines.cancelPolyline({ id });
   },
-  pathProcessor: (arr) => rdpSimplify(arr, 1),
-});
+};
 
-const remotePaths = new Paths({
+const localPathTracker = new PathTracker(
+  localPathTrackerEventHandler,
+  pathProcessor
+);
+
+const remotePathTrackerEventHandler: PathTrackerEventHandler = {
   onNewPath: ({ id, data }) => {
     polylines.startPolyline({ id, data });
   },
@@ -70,8 +72,12 @@ const remotePaths = new Paths({
   onCanceledPath: ({ id }) => {
     polylines.cancelPolyline({ id });
   },
-  pathProcessor: (arr) => rdpSimplify(arr, 1),
-});
+};
+
+const remotePathTracker = new PathTracker(
+  remotePathTrackerEventHandler,
+  pathProcessor
+);
 
 const pointerEventHandlers = {
   onPointerDown: ({ id, data }) => penTracker.down({ id, data }),
@@ -87,7 +93,7 @@ const canvas = new Canvas({
 
 const penTrackerEventHandler: PenTrackerEventHandler = {
   onPenDown: ({ id, data }) => {
-    localPaths.startPath({ id, data });
+    localPathTracker.startPath({ id, data });
     messages.send({
       action: "down",
       id,
@@ -95,7 +101,7 @@ const penTrackerEventHandler: PenTrackerEventHandler = {
     });
   },
   onPenUp: ({ id, data }) => {
-    localPaths.finishPath({ id, data });
+    localPathTracker.finishPath({ id, data });
     messages.send({
       action: "up",
       id,
@@ -103,7 +109,7 @@ const penTrackerEventHandler: PenTrackerEventHandler = {
     });
   },
   onPenMove: ({ id, data }) => {
-    localPaths.updatePath({ id, data });
+    localPathTracker.updatePath({ id, data });
     messages.send({
       action: "move",
       id,
@@ -122,7 +128,7 @@ const penTrackerEventHandler: PenTrackerEventHandler = {
     });
   },
   onPenCancel: ({ id }) => {
-    localPaths.cancelPath({ id });
+    localPathTracker.cancelPath({ id });
     messages.send({ action: "cancel", id });
   },
 };
@@ -132,16 +138,16 @@ const penTracker = new PenTracker(penTrackerEventHandler);
 function processMessage({ clientId, action, id, data }) {
   switch (action) {
     case "down":
-      remotePaths.startPath({ id, data });
+      remotePathTracker.startPath({ id, data });
       break;
     case "up":
-      remotePaths.finishPath({ id, data });
+      remotePathTracker.finishPath({ id, data });
       break;
     case "move":
-      remotePaths.updatePath({ id, data });
+      remotePathTracker.updatePath({ id, data });
       break;
     case "cancel":
-      remotePaths.cancelPath({ id });
+      remotePathTracker.cancelPath({ id });
       break;
     case "cursor":
       cursors.updateCursor(clientId, data);
