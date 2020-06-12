@@ -61,7 +61,7 @@ export default class Canvas implements CanvasInterface {
     this.cursorCanvas.removeChild(el);
   }
 
-  set zoom(f) {
+  set zoom(f: number) {
     this.zoomFactor = f;
     const width = 1600 * f;
     const height = 900 * f;
@@ -70,7 +70,11 @@ export default class Canvas implements CanvasInterface {
     setSvgViewBox(this.cursorCanvas, 0, 0, width, height);
   }
 
-  get zoom() {
+  get zoom(): number {
     return this.zoomFactor;
+  }
+
+  get svg(): string {
+    return new XMLSerializer().serializeToString(this.finishedCanvas);
   }
 }

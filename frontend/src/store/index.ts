@@ -14,7 +14,7 @@ function checkResponseErrors(response) {
   }
 }
 
-export default function callService(url, args) {
+function callService(url, args) {
   const headers = {
     Accept: "application/json",
     "Content-Type": "application/json",
@@ -30,5 +30,21 @@ export default function callService(url, args) {
     .then(checkHttpErrors)
     .then((resp) => resp.json())
     .then(checkResponseErrors)
-    .catch((err) => throw new Error(`Service failed: '${err}'`));
+    .catch((err) => new Error(`Service failed: '${err}'`));
+}
+
+interface StoreInterface {
+  store: (svg: string) => void;
+}
+
+export default class Store implements StoreInterface {
+  constructor() {}
+
+  store(svg: string) {
+    callService("/api/vector/", {
+      filename: "content.svg",
+      svg,
+      json: "jsoncontent",
+    }).then(() => console.log("stored"));
+  }
 }

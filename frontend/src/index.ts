@@ -3,12 +3,12 @@ import CursorTracker, { CursorTrackerEventHandler } from "./cursorTracker";
 import PenTracker, { PenTrackerEventHandler } from "./penTracker";
 import Polylines from "./polylines";
 import PathTracker, { PathTrackerEventHandler } from "./pathtracker";
-import callService from "./service.js";
 import Messages, { MessagesEventHandler } from "./messages";
+import Store from "./store";
 import { pathProcessor } from "./pathprocessor";
 import LSystem from "./l-system.js";
 
-const programs = {};
+const store = new Store();
 
 document
   .getElementById("zoom")
@@ -16,6 +16,10 @@ document
     "input",
     (evt) => (canvas.zoom = parseFloat((evt.target as HTMLInputElement).value))
   );
+
+document
+  .getElementById("send-button")
+  .addEventListener("click", () => store.store(canvas.svg));
 
 const messagesEventHandler: MessagesEventHandler = {
   onOpen: () => console.log("connection open"),
@@ -157,21 +161,6 @@ function processMessage({ clientId, action, id, data }) {
   }
 }
 
-function store() {
-  const el = document.getElementById("finished");
-  const serialized = new XMLSerializer().serializeToString(el);
-
-  callService("/api/vector/", {
-    filename: "content.svg",
-    svg: serialized,
-    json: "jsoncontent",
-  })
-    .then(() => console.log("stored"))
-    .catch((err) => console.error(err));
-}
-
-document.getElementById("send-button").addEventListener("click", () => store());
-
 document.addEventListener("keyup", (event) => {
   console.log(event.keyCode);
   if (event.keyCode === 75) {
@@ -195,6 +184,8 @@ const lsystem = new LSystem({
   onTurtleMove: ({ id, data }) => penTracker.move({ id, data }),
   onTurtleUp: ({ id, data }) => penTracker.up({ id, data }),
 });
+
+const programs = {};
 
 lsystem
   .loadProgram({
