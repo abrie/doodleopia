@@ -6,7 +6,7 @@ import radialSimplify from "./algorithms/RadialDistance.js";
 import rdpSimplify from "./algorithms/RamerDouglasPeucker.js";
 import simplify from "./algorithms/PassThrough.js";
 import callService from "./service.js";
-import Messages from "./messages.js";
+import Messages, { MessagesEventHandler } from "./messages";
 import Cursors from "./Cursors.js";
 import LSystem from "./l-system.js";
 
@@ -19,12 +19,14 @@ document
     (evt) => (canvas.zoom = parseFloat(evt.target.value))
   );
 
-const messages = new Messages({
+const messagesEventHandler: MessagesEventHandler = {
   onOpen: () => console.log("connection open"),
   onClose: () => console.log("connection closed"),
   onError: () => console.log("connection error"),
   onMessage: (message) => processMessage(message),
-});
+};
+
+const messages = new Messages(messagesEventHandler);
 
 const cursors = new Cursors({
   onNewCursor: (cursor) => canvas.addCursor(cursor),
