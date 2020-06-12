@@ -1,13 +1,13 @@
+import Canvas from "./canvas";
+import CursorTracker, { CursorTrackerEventHandler } from "./cursorTracker";
 import PenTracker, { PenTrackerEventHandler } from "./penTracker";
 import Polylines from "./Polylines.js";
 import Paths from "./Paths.js";
-import Canvas from "./canvas";
 import radialSimplify from "./algorithms/RadialDistance.js";
 import rdpSimplify from "./algorithms/RamerDouglasPeucker.js";
 import simplify from "./algorithms/PassThrough.js";
 import callService from "./service.js";
 import Messages, { MessagesEventHandler } from "./messages";
-import Cursors from "./Cursors.js";
 import LSystem from "./l-system.js";
 
 const programs = {};
@@ -16,7 +16,7 @@ document
   .getElementById("zoom")
   .addEventListener(
     "input",
-    (evt) => (canvas.zoom = parseFloat(evt.target.value))
+    (evt) => (canvas.zoom = parseFloat((evt.target as HTMLInputElement).value))
   );
 
 const messagesEventHandler: MessagesEventHandler = {
@@ -28,10 +28,12 @@ const messagesEventHandler: MessagesEventHandler = {
 
 const messages = new Messages(messagesEventHandler);
 
-const cursors = new Cursors({
+const cursorTrackerEventHandler: CursorTrackerEventHandler = {
   onNewCursor: (cursor) => canvas.addCursor(cursor),
   onDeadCursor: (cursor) => canvas.removeCursor(cursor),
-});
+};
+
+const cursors = new CursorTracker(cursorTrackerEventHandler);
 
 const polylines = new Polylines({
   onNewPolyline: (polyline) => canvas.startPolyline(polyline),
@@ -125,7 +127,7 @@ const penTrackerEventHandler: PenTrackerEventHandler = {
   },
 };
 
-const penTracker = new PenTracker(penTrackerEventHandlers);
+const penTracker = new PenTracker(penTrackerEventHandler);
 
 function processMessage({ clientId, action, id, data }) {
   switch (action) {

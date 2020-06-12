@@ -1,9 +1,21 @@
-export default class {
-  constructor({ onNewCursor, onDeadCursor }) {
-    this.onNewCursor = onNewCursor;
-    this.onDeadCursor = onDeadCursor;
-    this.cursors = {};
-    this.localCursor = [0, 0];
+import { Coordinate } from "../coordinates";
+
+export type CursorTrackerEventHandler = {
+  onNewCursor: (cursor: SVGElement) => void;
+  onDeadCursor: (cursor: SVGElement) => void;
+};
+
+interface CursorTrackerInterface {
+  updateCursor: (clientId: string, Coordinate) => void;
+}
+
+export default class CursorTracker implements CursorTrackerInterface {
+  eventHandler: CursorTrackerEventHandler;
+  cursors: Record<string, SVGElement> = {};
+  localCursor: Coordinate = [0, 0];
+
+  constructor(eventHandler: CursorTrackerEventHandler) {
+    this.eventHandler = eventHandler;
   }
 
   get local() {
@@ -20,16 +32,16 @@ export default class {
       cursor.setAttributeNS(null, "cx", x);
       cursor.setAttributeNS(null, "cy", y);
     } else {
-      const cursor = new Cursor();
+      const cursor = CreateCursor();
       cursor.setAttributeNS(null, "cx", x);
       cursor.setAttributeNS(null, "cy", y);
       this.cursors[clientId] = cursor;
-      this.onNewCursor(cursor);
+      this.eventHandler.onNewCursor(cursor);
     }
   }
 }
 
-function Cursor() {
+function CreateCursor(): SVGElement {
   const xmlns = "http://www.w3.org/2000/svg";
   const el = document.createElementNS(xmlns, "circle");
   el.setAttributeNS(null, "cx", "0");
