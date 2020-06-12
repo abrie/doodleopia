@@ -1,7 +1,7 @@
 import Canvas from "./canvas";
 import CursorTracker, { CursorTrackerEventHandler } from "./cursorTracker";
 import PenTracker, { PenTrackerEventHandler } from "./penTracker";
-import Polylines from "./Polylines.js";
+import Polylines from "./polylines";
 import PathTracker, { PathTrackerEventHandler } from "./pathtracker";
 import callService from "./service.js";
 import Messages, { MessagesEventHandler } from "./messages";
