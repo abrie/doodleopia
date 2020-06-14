@@ -1,15 +1,19 @@
-import type { Coordinate, AttributedCoordinate } from "../coordinates";
+import type {
+  Coordinate,
+  Attribution,
+  AttributedCoordinate,
+} from "../coordinates";
 
-export interface MessageInterface {
+export interface MessageInterface extends AttributedCoordinate {
   clientId: string;
   action: string;
-  attributedCoordinate: AttributedCoordinate;
 }
 
 export class Message implements MessageInterface {
   clientId: string;
   action: string;
-  attributedCoordinate: AttributedCoordinate;
+  id: Attribution;
+  data: Coordinate;
 
   static serialize(message: Message): string {
     return JSON.stringify(message);
