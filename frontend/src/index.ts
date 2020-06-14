@@ -2,13 +2,14 @@ import { AttributedCoordinate, AttributedCoordinates } from "./coordinates";
 import Canvas from "./canvas";
 import CursorTracker, { CursorTrackerEventHandler } from "./cursorTracker";
 import PenTracker, { PenTrackerEventHandler } from "./penTracker";
-import Polylines from "./polylines";
+import Polylines, { PolylineEventHandler } from "./polylines";
 import { PointerEventHandler } from "./pointerevents";
 import PathTracker, { PathTrackerEventHandler } from "./pathtracker";
 import Messages, { MessagesEventHandler, Message } from "./messages";
 import Store from "./store";
 import { pathProcessor } from "./pathprocessor";
-import LSystem from "./l-system.js";
+import { TurtleEventHandler } from "./turtle";
+import LSystem from "./lsystem";
 
 const store = new Store();
 
@@ -39,11 +40,13 @@ const cursorTrackerEventHandler: CursorTrackerEventHandler = {
 
 const cursors = new CursorTracker(cursorTrackerEventHandler);
 
-const polylines = new Polylines({
+const polylineEventHandler: PolylineEventHandler = {
   onNewPolyline: (polyline) => canvas.startPolyline(polyline),
   onFinishedPolyline: (polyline) => canvas.finishPolyline(polyline),
   onCanceledPolyline: (polyline) => canvas.cancelPolyline(polyline),
-});
+};
+
+const polylines = new Polylines(polylineEventHandler);
 
 const localPathTrackerEventHandler: PathTrackerEventHandler = {
   onNewPath: ({ id, data }: AttributedCoordinates) => {
@@ -178,11 +181,13 @@ document.addEventListener("keyup", (event) => {
 
 messages.open();
 
-const lsystem = new LSystem({
-  onTurtleDown: ({ id, data }) => penTracker.down({ id, data }),
-  onTurtleMove: ({ id, data }) => penTracker.move({ id, data }),
-  onTurtleUp: ({ id, data }) => penTracker.up({ id, data }),
-});
+const turtleEventHandler: TurtleEventHandler = {
+  onTurtleDown: (a: AttributedCoordinate) => penTracker.down(a),
+  onTurtleMove: (a: AttributedCoordinate) => penTracker.move(a),
+  onTurtleUp: (a: AttributedCoordinate) => penTracker.up(a),
+};
+
+const lsystem = new LSystem(turtleEventHandler);
 
 const programs = {};
 

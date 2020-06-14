@@ -31,7 +31,7 @@ export function attachPointerEventHandler(
       stopPrevent(evt);
       const { pointerId: id } = evt;
       const data = transformCoordinates(eventCoordinates(evt));
-      this.eventHandler.onPointerDown({ id, data });
+      eventHandler.onPointerDown({ id, data });
     },
     false
   );
@@ -42,7 +42,7 @@ export function attachPointerEventHandler(
       stopPrevent(evt);
       const { pointerId: id } = evt;
       const data = transformCoordinates(eventCoordinates(evt));
-      this.eventHandler.onPointerUp({ id, data });
+      eventHandler.onPointerUp({ id, data });
     },
     false
   );
@@ -53,7 +53,7 @@ export function attachPointerEventHandler(
       stopPrevent(evt);
       const { pointerId: id } = evt;
       const data = transformCoordinates(eventCoordinates(evt));
-      this.onPointerUp({ id, data });
+      onPointerUp({ id, data });
     },
     false
   );
@@ -63,7 +63,7 @@ export function attachPointerEventHandler(
     (evt: PointerEvent) => {
       stopPrevent(evt);
       const { pointerId: id } = evt;
-      this.eventHandler.onPointerCancel({ id });
+      eventHandler.onPointerCancel({ id });
     },
     false
   );
@@ -74,7 +74,7 @@ export function attachPointerEventHandler(
       stopPrevent(evt);
       const { pointerId: id } = evt;
       const data = transformCoordinates(eventCoordinates(evt));
-      this.eventHandler.onPointerMove({ id, data });
+      eventHandler.onPointerMove({ id, data });
     },
     false
   );

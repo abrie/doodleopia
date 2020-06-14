@@ -1,6 +1,6 @@
 import { Coordinate, AttributedCoordinates, Attribution } from "../coordinates";
 
-interface PolylineEventHandler {
+export interface PolylineEventHandler {
   onFinishedPolyline: (el: SVGElement) => void;
   onNewPolyline: (el: SVGElement) => void;
   onCanceledPolyline: (el: SVGElement) => void;

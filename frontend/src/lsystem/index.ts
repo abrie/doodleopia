@@ -1,6 +1,13 @@
-import Turtle from "./turtle.js";
+import Turtle, { TurtleEventHandler, TurtleState } from "../turtle";
 
 class Generator {
+  axiom: string;
+  rules: Record<string, string>;
+  angle: number;
+  distance: number;
+  string: string;
+  stack: TurtleState[];
+
   constructor({ axiom, rules, angle, distance }) {
     this.axiom = axiom;
     this.rules = rules;
@@ -47,13 +54,12 @@ class Generator {
   }
 }
 
-export default class {
-  constructor({ onTurtleDown, onTurtleMove, onTurtleUp }) {
-    this.turtle = new Turtle({
-      onTurtleDown,
-      onTurtleMove,
-      onTurtleUp,
-    });
+export default class LSystem {
+  turtleEventHandler: TurtleEventHandler;
+  turtle: Turtle;
+
+  constructor(turtleEventHandler: TurtleEventHandler) {
+    this.turtle = new Turtle(turtleEventHandler);
   }
 
   loadProgram({ axiom, rules, iterations, angle, distance }) {
