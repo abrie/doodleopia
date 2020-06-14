@@ -28,10 +28,7 @@ const messagesEventHandler: MessagesEventHandler = {
   onOpen: () => console.log("connection open"),
   onClose: () => console.log("connection closed"),
   onError: () => console.log("connection error"),
-  onMessage: (message) => {
-    console.log(message);
-    processMessage(message);
-  },
+  onMessage: (message) => processMessage(message),
 };
 
 const messages = new Messages(messagesEventHandler);
