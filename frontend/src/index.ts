@@ -48,7 +48,7 @@ const polylineEventHandler: PolylineEventHandler = {
 
 const polylines = new Polylines(polylineEventHandler);
 
-const localPathTrackerEventHandler: PathTrackerEventHandler = {
+const pathTrackerEventHandler: PathTrackerEventHandler = {
   onNewPath: ({ id, data }: AttributedCoordinates) => {
     polylines.startPolyline({ id, data });
   },
@@ -63,30 +63,7 @@ const localPathTrackerEventHandler: PathTrackerEventHandler = {
   },
 };
 
-const localPathTracker = new PathTracker(
-  localPathTrackerEventHandler,
-  pathProcessor
-);
-
-const remotePathTrackerEventHandler: PathTrackerEventHandler = {
-  onNewPath: ({ id, data }: AttributedCoordinates) => {
-    polylines.startPolyline({ id, data });
-  },
-  onFinishedPath: ({ id, data }: AttributedCoordinates) => {
-    polylines.finishPolyline({ id, data });
-  },
-  onUpdatedPath: ({ id, data }: AttributedCoordinates) => {
-    polylines.updatePolyline({ id, data });
-  },
-  onCanceledPath: ({ id }: AttributedCoordinates) => {
-    polylines.cancelPolyline({ id });
-  },
-};
-
-const remotePathTracker = new PathTracker(
-  remotePathTrackerEventHandler,
-  pathProcessor
-);
+const pathTracker = new PathTracker(pathTrackerEventHandler, pathProcessor);
 
 const pointerEventHandler: PointerEventHandler = {
   onPointerDown: (a: AttributedCoordinate) => penTracker.down(a),
@@ -102,21 +79,21 @@ const canvas = new Canvas({
 
 const penTrackerEventHandler: PenTrackerEventHandler = {
   onPenDown: (a: AttributedCoordinate) => {
-    localPathTracker.startPath(a);
+    pathTracker.startPath(a);
     messages.send({
       action: "down",
       ...a,
     });
   },
   onPenUp: (a: AttributedCoordinate) => {
-    localPathTracker.finishPath(a);
+    pathTracker.finishPath(a);
     messages.send({
       action: "up",
       ...a,
     });
   },
   onPenMove: (a: AttributedCoordinate) => {
-    localPathTracker.updatePath(a);
+    pathTracker.updatePath(a);
     messages.send({
       action: "move",
       ...a,
@@ -134,7 +111,7 @@ const penTrackerEventHandler: PenTrackerEventHandler = {
     });
   },
   onPenCancel: (a: AttributedCoordinate) => {
-    localPathTracker.cancelPath(a);
+    pathTracker.cancelPath(a);
     messages.send({ action: "cancel", ...a });
   },
 };
@@ -148,16 +125,16 @@ function processMessage({ clientId, action, id, data }: Message) {
   };
   switch (action) {
     case "down":
-      remotePathTracker.startPath(attributedCoordinate);
+      pathTracker.startPath(attributedCoordinate);
       break;
     case "up":
-      remotePathTracker.finishPath(attributedCoordinate);
+      pathTracker.finishPath(attributedCoordinate);
       break;
     case "move":
-      remotePathTracker.updatePath(attributedCoordinate);
+      pathTracker.updatePath(attributedCoordinate);
       break;
     case "cancel":
-      remotePathTracker.cancelPath(attributedCoordinate);
+      pathTracker.cancelPath(attributedCoordinate);
       break;
     case "cursor":
       cursors.updateCursor(clientId, data);
