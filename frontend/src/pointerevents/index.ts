@@ -20,6 +20,10 @@ export interface PointerEventHandler {
   onPointerCancel: (a: AttributedCoordinate) => void;
 }
 
+function pointerIdToId(pointerId: number) {
+  return `${pointerId}`;
+}
+
 export function attachPointerEventHandler(
   target: HTMLElement,
   eventHandler: PointerEventHandler,
@@ -29,7 +33,7 @@ export function attachPointerEventHandler(
     "pointerdown",
     (evt: PointerEvent) => {
       stopPrevent(evt);
-      const { pointerId: id } = evt;
+      const id = pointerIdToId(evt.pointerId);
       const data = transformCoordinates(eventCoordinates(evt));
       eventHandler.onPointerDown({ id, data });
     },
@@ -40,7 +44,7 @@ export function attachPointerEventHandler(
     "pointerup",
     (evt: PointerEvent) => {
       stopPrevent(evt);
-      const { pointerId: id } = evt;
+      const id = pointerIdToId(evt.pointerId);
       const data = transformCoordinates(eventCoordinates(evt));
       eventHandler.onPointerUp({ id, data });
     },
@@ -51,9 +55,9 @@ export function attachPointerEventHandler(
     "pointerup",
     (evt: PointerEvent) => {
       stopPrevent(evt);
-      const { pointerId: id } = evt;
+      const id = pointerIdToId(evt.pointerId);
       const data = transformCoordinates(eventCoordinates(evt));
-      onPointerUp({ id, data });
+      eventHandler.onPointerUp({ id, data });
     },
     false
   );
@@ -62,7 +66,7 @@ export function attachPointerEventHandler(
     "pointercancel",
     (evt: PointerEvent) => {
       stopPrevent(evt);
-      const { pointerId: id } = evt;
+      const id = pointerIdToId(evt.pointerId);
       eventHandler.onPointerCancel({ id });
     },
     false
@@ -72,7 +76,7 @@ export function attachPointerEventHandler(
     "pointermove",
     (evt: PointerEvent) => {
       stopPrevent(evt);
-      const { pointerId: id } = evt;
+      const id = pointerIdToId(evt.pointerId);
       const data = transformCoordinates(eventCoordinates(evt));
       eventHandler.onPointerMove({ id, data });
     },
