@@ -3,16 +3,12 @@ import Turtle, { TurtleEventHandler, TurtleState } from "../turtle";
 class Generator {
   axiom: string;
   rules: Record<string, string>;
-  angle: number;
-  distance: number;
   string: string;
   stack: TurtleState[];
 
-  constructor({ axiom, rules, angle, distance }) {
+  constructor({ axiom, rules }) {
     this.axiom = axiom;
     this.rules = rules;
-    this.angle = angle;
-    this.distance = distance;
     this.string = `${axiom}`;
     this.stack = [];
   }
@@ -28,18 +24,18 @@ class Generator {
     return this.string;
   }
 
-  *actions(turtle) {
+  *actions(turtle, { angle, distance }) {
     for (var idx = 0; idx < this.string.length; idx++) {
       switch (this.string[idx]) {
         case "F":
         case "G":
-          yield () => turtle.forward(this.distance);
+          yield () => turtle.forward(distance);
           break;
         case "+":
-          yield () => turtle.turn(this.angle);
+          yield () => turtle.turn(angle);
           break;
         case "-":
-          yield () => turtle.turn(this.angle * -1);
+          yield () => turtle.turn(angle * -1);
           break;
         case "[":
           yield () => this.stack.push(turtle.state);
@@ -62,9 +58,9 @@ export default class LSystem {
     this.turtle = new Turtle(turtleEventHandler);
   }
 
-  loadProgram({ axiom, rules, iterations, angle, distance }) {
+  loadProgram({ axiom, rules, iterations }) {
     return new Promise((resolve, reject) => {
-      const generator = new Generator({ axiom, rules, angle, distance });
+      const generator = new Generator({ axiom, rules });
       for (var i = 0; i < iterations; i++) {
         generator.iterate();
       }
@@ -72,10 +68,10 @@ export default class LSystem {
     });
   }
 
-  run(point, generator) {
+  run(point, generator, { angle, distance }) {
     this.turtle.move(point);
     this.turtle.down();
-    for (let action of generator.actions(this.turtle)) {
+    for (let action of generator.actions(this.turtle, { angle, distance })) {
       action();
     }
     this.turtle.up();
