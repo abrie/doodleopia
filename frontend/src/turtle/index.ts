@@ -18,6 +18,7 @@ interface TurtleInterface {
   move: (c: Coordinate) => void;
   turn: (a: number) => void;
   forward: (d: number) => void;
+  setTheta: (d: number) => void;
   state: TurtleState;
 }
 
@@ -51,6 +52,10 @@ export default class Turtle implements TurtleInterface {
 
   turn(deg: number) {
     this.theta += (deg * Math.PI) / 180;
+  }
+
+  setTheta(angle) {
+    this.theta = angle;
   }
 
   forward(d: number) {

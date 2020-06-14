@@ -54,6 +54,6 @@ function NewPolyline(): SVGElement {
   polyline.setAttributeNS(null, "points", "");
   polyline.setAttributeNS(null, "fill", "none");
   polyline.setAttributeNS(null, "stroke", "black");
-  polyline.setAttributeNS(null, "stroke-linejoin", "arcs");
+  polyline.setAttributeNS(null, "stroke-linejoin", "round");
   return polyline;
 }

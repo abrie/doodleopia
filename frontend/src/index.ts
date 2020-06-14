@@ -167,15 +167,25 @@ document.addEventListener("keyup", (event) => {
   console.log(event.keyCode);
   if (event.keyCode === 75) {
     // 'k'
-    lsystem.run(cursors.local, programs["koch"], {angle:60, distance:2});
+    lsystem.run(cursors.local, programs["koch"], { angle: 0, distance: 2 });
   }
   if (event.keyCode === 83) {
     // 's'
-    lsystem.run(cursors.local, programs["sierpinski"],{angle:120,distance:20});
+    lsystem.run(cursors.local, programs["sierpinski"], {
+      angle: 0,
+      distance: 2,
+    });
   }
   if (event.keyCode === 70) {
     // 'f'
-    lsystem.run(cursors.local, programs["fern"],{angle:25,distance:10});
+    lsystem.run(cursors.local, programs["fern"], { angle: 180, distance: 10 });
+  }
+  if (event.keyCode === 68) {
+    // 'f'
+    lsystem.run(cursors.local, programs["dragon"], {
+      angle: 0,
+      distance: 10,
+    });
   }
 });
 
@@ -195,6 +205,7 @@ lsystem
   .loadProgram({
     axiom: "F+F--F+F",
     rules: { F: "F+F--F+F" },
+    angle: 60,
     iterations: 3,
   })
   .then((program) => {
@@ -206,6 +217,7 @@ lsystem
   .loadProgram({
     axiom: "F-G-G",
     rules: { F: "F-G+F+G-F", G: "GG" },
+    angle: 120,
     iterations: 5,
   })
   .then((program) => {
@@ -217,9 +229,22 @@ lsystem
   .loadProgram({
     axiom: "X",
     rules: { X: "F+[[X]-X]-F[-FX]+X", F: "FF" },
+    angle: 25,
     iterations: 5,
   })
   .then((program) => {
     console.log("fern generated.");
     programs["fern"] = program;
+  });
+
+lsystem
+  .loadProgram({
+    axiom: "FX",
+    rules: { X: "X+YF+", Y: "-FX-Y" },
+    angle: 90,
+    iterations: 10,
+  })
+  .then((program) => {
+    console.log("dragon generated.");
+    programs["dragon"] = program;
   });

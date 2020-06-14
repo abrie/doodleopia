@@ -3,12 +3,14 @@ import Turtle, { TurtleEventHandler, TurtleState } from "../turtle";
 class Generator {
   axiom: string;
   rules: Record<string, string>;
+  angle: number;
   string: string;
   stack: TurtleState[];
 
-  constructor({ axiom, rules }) {
+  constructor({ axiom, rules, angle }) {
     this.axiom = axiom;
     this.rules = rules;
+    this.angle = angle;
     this.string = `${axiom}`;
     this.stack = [];
   }
@@ -24,7 +26,7 @@ class Generator {
     return this.string;
   }
 
-  *actions(turtle, { angle, distance }) {
+  *actions(turtle, { distance }) {
     for (var idx = 0; idx < this.string.length; idx++) {
       switch (this.string[idx]) {
         case "F":
@@ -32,10 +34,10 @@ class Generator {
           yield () => turtle.forward(distance);
           break;
         case "+":
-          yield () => turtle.turn(angle);
+          yield () => turtle.turn(this.angle);
           break;
         case "-":
-          yield () => turtle.turn(angle * -1);
+          yield () => turtle.turn(this.angle * -1);
           break;
         case "[":
           yield () => this.stack.push(turtle.state);
@@ -58,9 +60,9 @@ export default class LSystem {
     this.turtle = new Turtle(turtleEventHandler);
   }
 
-  loadProgram({ axiom, rules, iterations }) {
+  loadProgram({ axiom, rules, angle, iterations }) {
     return new Promise((resolve, reject) => {
-      const generator = new Generator({ axiom, rules });
+      const generator = new Generator({ axiom, rules, angle });
       for (var i = 0; i < iterations; i++) {
         generator.iterate();
       }
@@ -69,9 +71,10 @@ export default class LSystem {
   }
 
   run(point, generator, { angle, distance }) {
+    this.turtle.setTheta(angle);
     this.turtle.move(point);
     this.turtle.down();
-    for (let action of generator.actions(this.turtle, { angle, distance })) {
+    for (let action of generator.actions(this.turtle, { distance })) {
       action();
     }
     this.turtle.up();
