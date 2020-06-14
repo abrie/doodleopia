@@ -1,8 +1,9 @@
-import { SVGCoordinateTransformer } from "../coordinates";
+import { SVGCoordinateTransformer, AttributedCoordinate } from "../coordinates";
+
 import {
-  PointerEventHandlers,
-  attachPointerEventHandlers,
-} from "./pointerEvents";
+  PointerEventHandler,
+  attachPointerEventHandler,
+} from "../pointerevents";
 import { createSvgElement, setSvgViewBox } from "./svg";
 
 interface CanvasInterface {
@@ -13,9 +14,9 @@ interface CanvasInterface {
   removeCursor: (element: SVGElement) => void;
 }
 
-interface CanvasConstructorParams {
+interface CanvasConstructor {
   target: HTMLElement;
-  pointerEventHandlers: PointerEventHandlers;
+  pointerEventHandler: PointerEventHandler;
 }
 
 export default class Canvas implements CanvasInterface {
@@ -24,7 +25,7 @@ export default class Canvas implements CanvasInterface {
   cursorCanvas: SVGSVGElement = undefined;
   zoomFactor: number;
 
-  constructor({ target, pointerEventHandlers }: CanvasConstructorParams) {
+  constructor({ target, pointerEventHandler }: CanvasConstructor) {
     this.workingCanvas = createSvgElement(1600, 900);
     this.finishedCanvas = createSvgElement(1600, 900);
     this.cursorCanvas = createSvgElement(1600, 900);
@@ -33,9 +34,9 @@ export default class Canvas implements CanvasInterface {
     target.appendChild(this.finishedCanvas);
     target.appendChild(this.cursorCanvas);
 
-    attachPointerEventHandlers(
+    attachPointerEventHandler(
       target,
-      pointerEventHandlers,
+      pointerEventHandler,
       SVGCoordinateTransformer(this.workingCanvas)
     );
   }

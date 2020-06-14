@@ -2,6 +2,8 @@ import { v4 as uuidv4 } from "uuid";
 import type { Coordinate } from "../coordinates";
 import { Message } from "./message";
 
+export { Message };
+
 export type MessagesEventHandler = {
   onOpen: () => void;
   onClose: () => void;

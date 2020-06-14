@@ -1,4 +1,4 @@
-import { Coordinate } from "../coordinates";
+import { Coordinate, AttributedCoordinates, Attribution } from "../coordinates";
 
 interface PolylineEventHandler {
   onFinishedPolyline: (el: SVGElement) => void;
@@ -6,31 +6,26 @@ interface PolylineEventHandler {
   onCanceledPolyline: (el: SVGElement) => void;
 }
 
-interface PolylineParameter {
-  id: number;
-  data?: Coordinate[];
-}
-
 export default class Polylines {
   eventHandler: PolylineEventHandler;
-  polylines: Record<number, SVGElement> = {};
+  polylines: Record<Attribution, SVGElement> = {};
   constructor(eventHandler: PolylineEventHandler) {
     this.eventHandler = eventHandler;
   }
 
-  startPolyline({ id, data }: PolylineParameter) {
+  startPolyline({ id, data }: AttributedCoordinates) {
     this.polylines[id] = NewPolyline();
     this.updatePolyline({ id, data });
     this.eventHandler.onNewPolyline(this.polylines[id]);
   }
 
-  finishPolyline({ id, data }: PolylineParameter) {
+  finishPolyline({ id, data }: AttributedCoordinates) {
     const polyline = this.polylines[id];
     this.eventHandler.onFinishedPolyline(polyline);
     delete this.polylines[id];
   }
 
-  updatePolyline({ id, data }: PolylineParameter) {
+  updatePolyline({ id, data }: AttributedCoordinates) {
     this.polylines[id].setAttributeNS(
       null,
       "points",
@@ -38,18 +33,18 @@ export default class Polylines {
     );
   }
 
-  cancelPolyline({ id }: PolylineParameter) {
+  cancelPolyline({ id }: AttributedCoordinates) {
     const polyline = this.polylines[id];
     this.eventHandler.onCanceledPolyline(polyline);
     delete this.polylines[id];
   }
 
-  has(id) {
+  has(id: Attribution) {
     return this.polylines[id] && true;
   }
 }
 
-function coordToString([x, y]) {
+function coordToString([x, y]: Coordinate) {
   return `${x},${y}`;
 }
 

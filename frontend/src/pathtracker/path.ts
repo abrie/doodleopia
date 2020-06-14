@@ -1,20 +1,24 @@
-import { Coordinate } from "../coordinates";
+import { Coordinate, Attribution, AttributedCoordinates } from "../coordinates";
 import { PathProcessor } from "../pathprocessor";
 
-export type PathConstructorParams = {
-  id: number;
+export interface PathConstructor extends AttributedCoordinates {
   raw: Coordinate[];
-  data: Coordinate[];
   processor: PathProcessor;
-};
+}
 
-export default class Path {
-  id: number;
+export interface PathInterface extends AttributedCoordinates {
   raw: Coordinate[];
+  processor: PathProcessor;
+  pushCoordinate: (coordinate: Coordinate) => void;
+}
+
+export class Path implements PathInterface {
+  id: Attribution;
   data: Coordinate[];
+  raw: Coordinate[];
   processor: PathProcessor;
 
-  constructor(params: PathConstructorParams) {
+  constructor(params: PathConstructor) {
     this.id = params.id;
     this.raw = params.raw;
     this.data = params.data;

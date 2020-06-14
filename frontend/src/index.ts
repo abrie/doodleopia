@@ -1,9 +1,11 @@
+import { AttributedCoordinate, AttributedCoordinates } from "./coordinates";
 import Canvas from "./canvas";
 import CursorTracker, { CursorTrackerEventHandler } from "./cursorTracker";
 import PenTracker, { PenTrackerEventHandler } from "./penTracker";
 import Polylines from "./polylines";
+import { PointerEventHandler } from "./pointerevents";
 import PathTracker, { PathTrackerEventHandler } from "./pathtracker";
-import Messages, { MessagesEventHandler } from "./messages";
+import Messages, { MessagesEventHandler, Message } from "./messages";
 import Store from "./store";
 import { pathProcessor } from "./pathprocessor";
 import LSystem from "./l-system.js";
@@ -44,16 +46,16 @@ const polylines = new Polylines({
 });
 
 const localPathTrackerEventHandler: PathTrackerEventHandler = {
-  onNewPath: ({ id, data }) => {
+  onNewPath: ({ id, data }: AttributedCoordinates) => {
     polylines.startPolyline({ id, data });
   },
-  onFinishedPath: ({ id, data }) => {
+  onFinishedPath: ({ id, data }: AttributedCoordinates) => {
     polylines.finishPolyline({ id, data });
   },
-  onUpdatedPath: ({ id, data }) => {
+  onUpdatedPath: ({ id, data }: AttributedCoordinates) => {
     polylines.updatePolyline({ id, data });
   },
-  onCanceledPath: ({ id }) => {
+  onCanceledPath: ({ id }: AttributedCoordinates) => {
     polylines.cancelPolyline({ id });
   },
 };
@@ -64,16 +66,16 @@ const localPathTracker = new PathTracker(
 );
 
 const remotePathTrackerEventHandler: PathTrackerEventHandler = {
-  onNewPath: ({ id, data }) => {
+  onNewPath: ({ id, data }: AttributedCoordinates) => {
     polylines.startPolyline({ id, data });
   },
-  onFinishedPath: ({ id, data }) => {
+  onFinishedPath: ({ id, data }: AttributedCoordinates) => {
     polylines.finishPolyline({ id, data });
   },
-  onUpdatedPath: ({ id, data }) => {
+  onUpdatedPath: ({ id, data }: AttributedCoordinates) => {
     polylines.updatePolyline({ id, data });
   },
-  onCanceledPath: ({ id }) => {
+  onCanceledPath: ({ id }: AttributedCoordinates) => {
     polylines.cancelPolyline({ id });
   },
 };
@@ -83,78 +85,75 @@ const remotePathTracker = new PathTracker(
   pathProcessor
 );
 
-const pointerEventHandlers = {
-  onPointerDown: ({ id, data }) => penTracker.down({ id, data }),
-  onPointerUp: ({ id, data }) => penTracker.up({ id, data }),
-  onPointerMove: ({ id, data }) => penTracker.move({ id, data }),
-  onPointerCancel: ({ id }) => penTracker.cancel({ id }),
+const pointerEventHandler: PointerEventHandler = {
+  onPointerDown: (a: AttributedCoordinate) => penTracker.down(a),
+  onPointerUp: (a: AttributedCoordinate) => penTracker.up(a),
+  onPointerMove: (a: AttributedCoordinate) => penTracker.move(a),
+  onPointerCancel: (a: AttributedCoordinate) => penTracker.cancel(a),
 };
 
 const canvas = new Canvas({
   target: document.getElementById("canvas"),
-  pointerEventHandlers,
+  pointerEventHandler,
 });
 
 const penTrackerEventHandler: PenTrackerEventHandler = {
-  onPenDown: ({ id, data }) => {
-    localPathTracker.startPath({ id, data });
+  onPenDown: (a: AttributedCoordinate) => {
+    localPathTracker.startPath(a);
     messages.send({
       action: "down",
-      id,
-      data,
+      ...a,
     });
   },
-  onPenUp: ({ id, data }) => {
-    localPathTracker.finishPath({ id, data });
+  onPenUp: (a: AttributedCoordinate) => {
+    localPathTracker.finishPath(a);
     messages.send({
       action: "up",
-      id,
-      data,
+      ...a,
     });
   },
-  onPenMove: ({ id, data }) => {
-    localPathTracker.updatePath({ id, data });
+  onPenMove: (a: AttributedCoordinate) => {
+    localPathTracker.updatePath(a);
     messages.send({
       action: "move",
-      id,
-      data,
+      ...a,
     });
     messages.send({
       action: "cursor",
-      data,
+      ...a,
     });
   },
-  onPenHover: ({ id, data }) => {
-    cursors.local = data;
+  onPenHover: (a: AttributedCoordinate) => {
+    cursors.local = a.data;
     messages.send({
       action: "cursor",
-      data,
+      ...a,
     });
   },
-  onPenCancel: ({ id }) => {
-    localPathTracker.cancelPath({ id });
-    messages.send({ action: "cancel", id });
+  onPenCancel: (a: AttributedCoordinate) => {
+    localPathTracker.cancelPath(a);
+    messages.send({ action: "cancel", ...a });
   },
 };
 
 const penTracker = new PenTracker(penTrackerEventHandler);
 
-function processMessage({ clientId, action, id, data }) {
+function processMessage({ clientId, action, attributedCoordinate }: Message) {
   switch (action) {
     case "down":
-      remotePathTracker.startPath({ id, data });
+      remotePathTracker.startPath(attributedCoordinate);
       break;
     case "up":
-      remotePathTracker.finishPath({ id, data });
+      remotePathTracker.finishPath(attributedCoordinate);
       break;
     case "move":
-      remotePathTracker.updatePath({ id, data });
+      remotePathTracker.updatePath(attributedCoordinate);
       break;
     case "cancel":
-      remotePathTracker.cancelPath({ id });
+      remotePathTracker.cancelPath(attributedCoordinate);
       break;
     case "cursor":
-      cursors.updateCursor(clientId, data);
+      cursors.updateCursor(clientId, attributedCoordinate.data);
       break;
     default:
       console.log(`Unknown message action: ${action}`);

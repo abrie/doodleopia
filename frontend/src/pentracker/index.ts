@@ -1,37 +1,40 @@
-import type { Coordinate } from "../coordinates";
+import type {
+  Coordinate,
+  Attribution,
+  AttributedCoordinate,
+} from "../coordinates";
 
-type PenId = number;
-type DownMap = Record<PenId, boolean>;
+type DownMap = Record<Attribution, boolean>;
 
 class DownTracker {
   down: DownMap = {};
 
-  set(id: PenId) {
+  set(id: Attribution) {
     this.down[id] = true;
   }
 
-  has(id: PenId): boolean {
+  has(id: Attribution): boolean {
     return true && this.down[id];
   }
 
-  delete(id: PenId) {
+  delete(id: Attribution) {
     delete this.down[id];
   }
 }
 
 export interface PenTrackerEventHandler {
-  onPenDown: ({ id: PenId, data: Coordinate }) => void;
-  onPenMove: ({ id: PenId, data: Coordinate }) => void;
-  onPenHover: ({ id: PenId, data: Coordinate }) => void;
-  onPenUp: ({ id: PenId, data: Coordinate }) => void;
-  onPenCancel: ({ id: PenId }) => void;
+  onPenDown: (a: AttributedCoordinate) => void;
+  onPenMove: (a: AttributedCoordinate) => void;
+  onPenHover: (a: AttributedCoordinate) => void;
+  onPenUp: (a: AttributedCoordinate) => void;
+  onPenCancel: (a: AttributedCoordinate) => void;
 }
 
 interface PenTrackerInterface {
-  down: ({ id: PenId, data: Coordinate }) => void;
-  up: ({ id: PenId, data: Coordinate }) => void;
-  move: ({ id: PenId, data: Coordinate }) => void;
-  cancel: ({ id: PenId }) => void;
+  down: (a: AttributedCoordinate) => void;
+  up: (a: AttributedCoordinate) => void;
+  move: (a: AttributedCoordinate) => void;
+  cancel: (a: AttributedCoordinate) => void;
 }
 
 export default class PenTracker implements PenTrackerInterface {
@@ -42,19 +45,19 @@ export default class PenTracker implements PenTrackerInterface {
     this.eventHandler = eventHandler;
   }
 
-  down({ id, data }) {
+  down({ id, data }: AttributedCoordinate) {
     this.downTracker.set(id);
     this.eventHandler.onPenDown({ id, data });
   }
 
-  up({ id, data }) {
+  up({ id, data }: AttributedCoordinate) {
     if (this.downTracker.has(id)) {
       this.downTracker.delete(id);
       this.eventHandler.onPenUp({ id, data });
     }
   }
 
-  move({ id, data }) {
+  move({ id, data }: AttributedCoordinate) {
     if (this.downTracker.has(id)) {
       this.eventHandler.onPenMove({ id, data });
     } else {
@@ -62,7 +65,7 @@ export default class PenTracker implements PenTrackerInterface {
     }
   }
 
-  cancel({ id }) {
+  cancel({ id }: AttributedCoordinate) {
     if (this.downTracker.has(id)) {
       this.downTracker.delete(id);
       this.eventHandler.onPenCancel({ id });

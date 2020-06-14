@@ -1,81 +1,80 @@
-import { CoordinateTransformer } from "../coordinates";
+import {
+  CoordinateTransformer,
+  Coordinate,
+  AttributedCoordinate,
+} from "../coordinates";
 
-function stopPrevent(evt) {
+function stopPrevent(evt: PointerEvent) {
   evt.stopPropagation();
   evt.preventDefault();
 }
 
-function eventCoordinates(evt) {
+function eventCoordinates(evt: PointerEvent): Coordinate {
   return [evt.clientX, evt.clientY];
 }
 
-export interface PointerEventHandlers {
-  onPointerDown: ({ id: number, data: Coordinate }) => void;
-  onPointerUp: ({ id: number, data: Coordinate }) => void;
-  onPointerMove: ({ id: number, data: Coordinate }) => void;
-  onPointerCancel: ({ id: number }) => void;
+export interface PointerEventHandler {
+  onPointerDown: (a: AttributedCoordinate) => void;
+  onPointerUp: (a: AttributedCoordinate) => void;
+  onPointerMove: (a: AttributedCoordinate) => void;
+  onPointerCancel: (a: AttributedCoordinate) => void;
 }
 
-export function attachPointerEventHandlers(
+export function attachPointerEventHandler(
   target: HTMLElement,
-  {
-    onPointerDown,
-    onPointerUp,
-    onPointerMove,
-    onPointerCancel,
-  }: PointerEventHandlers,
+  eventHandler: PointerEventHandler,
   transformCoordinates: CoordinateTransformer
 ) {
   target.addEventListener(
     "pointerdown",
-    (evt) => {
+    (evt: PointerEvent) => {
       stopPrevent(evt);
       const { pointerId: id } = evt;
       const data = transformCoordinates(eventCoordinates(evt));
-      onPointerDown({ id, data });
+      this.eventHandler.onPointerDown({ id, data });
     },
     false
   );
 
   target.addEventListener(
     "pointerup",
-    (evt) => {
+    (evt: PointerEvent) => {
       stopPrevent(evt);
       const { pointerId: id } = evt;
       const data = transformCoordinates(eventCoordinates(evt));
-      onPointerUp({ id, data });
+      this.eventHandler.onPointerUp({ id, data });
     },
     false
   );
 
   document.addEventListener(
     "pointerup",
-    (evt) => {
+    (evt: PointerEvent) => {
       stopPrevent(evt);
       const { pointerId: id } = evt;
       const data = transformCoordinates(eventCoordinates(evt));
-      onPointerUp({ id, data });
+      this.onPointerUp({ id, data });
     },
     false
   );
 
   target.addEventListener(
     "pointercancel",
-    (evt) => {
+    (evt: PointerEvent) => {
       stopPrevent(evt);
       const { pointerId: id } = evt;
-      onPointerCancel({ id });
+      this.eventHandler.onPointerCancel({ id });
     },
     false
   );
 
   target.addEventListener(
     "pointermove",
-    (evt) => {
+    (evt: PointerEvent) => {
       stopPrevent(evt);
       const { pointerId: id } = evt;
       const data = transformCoordinates(eventCoordinates(evt));
-      onPointerMove({ id, data });
+      this.eventHandler.onPointerMove({ id, data });
     },
     false
   );

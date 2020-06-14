@@ -1,4 +1,15 @@
+export type Attribution = string;
 export type Coordinate = [number, number];
+
+export interface AttributedCoordinate {
+  id: Attribution;
+  data?: Coordinate;
+}
+
+export interface AttributedCoordinates {
+  id: Attribution;
+  data?: Coordinate[];
+}
 
 export type CoordinateTransformer = (Coordinate) => Coordinate;
 

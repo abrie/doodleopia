@@ -1,10 +1,15 @@
-import type { Coordinate } from "../coordinates";
+import type { Coordinate, AttributedCoordinate } from "../coordinates";
 
-export class Message {
+export interface MessageInterface {
   clientId: string;
   action: string;
-  id: number;
-  data: Coordinate;
+  attributedCoordinate: AttributedCoordinate;
+}
+
+export class Message implements MessageInterface {
+  clientId: string;
+  action: string;
+  attributedCoordinate: AttributedCoordinate;
 
   static serialize(message: Message): string {
     return JSON.stringify(message);
