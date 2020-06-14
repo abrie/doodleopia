@@ -28,7 +28,10 @@ const messagesEventHandler: MessagesEventHandler = {
   onOpen: () => console.log("connection open"),
   onClose: () => console.log("connection closed"),
   onError: () => console.log("connection error"),
-  onMessage: (message) => processMessage(message),
+  onMessage: (message) => {
+    console.log(message);
+    processMessage(message);
+  },
 };
 
 const messages = new Messages(messagesEventHandler);
@@ -141,7 +144,11 @@ const penTrackerEventHandler: PenTrackerEventHandler = {
 
 const penTracker = new PenTracker(penTrackerEventHandler);
 
-function processMessage({ clientId, action, attributedCoordinate }: Message) {
+function processMessage({ clientId, action, id, data }: Message) {
+  const attributedCoordinate: AttributedCoordinate = {
+    id: `${clientId}.${id}`,
+    data: data,
+  };
   switch (action) {
     case "down":
       remotePathTracker.startPath(attributedCoordinate);
@@ -156,7 +163,7 @@ function processMessage({ clientId, action, attributedCoordinate }: Message) {
       remotePathTracker.cancelPath(attributedCoordinate);
       break;
     case "cursor":
-      cursors.updateCursor(clientId, attributedCoordinate.data);
+      cursors.updateCursor(clientId, data);
       break;
     default:
       console.log(`Unknown message action: ${action}`);
