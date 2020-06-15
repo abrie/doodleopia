@@ -149,6 +149,7 @@ document.addEventListener("keyup", (event) => {
 });
 
 const store = new Store();
+messages.open();
 
 document
   .getElementById("zoom")
@@ -160,37 +161,3 @@ document
 document
   .getElementById("send-button")
   .addEventListener("click", () => store.store(canvas.svg));
-
-messages.open();
-
-lsystem.loadProgram({
-  name: "koch",
-  axiom: "F+F--F+F",
-  rules: { F: "F+F--F+F" },
-  angle: 60,
-  iterations: 3,
-});
-
-lsystem.loadProgram({
-  name: "sierpinski",
-  axiom: "F-G-G",
-  rules: { F: "F-G+F+G-F", G: "GG" },
-  angle: 120,
-  iterations: 5,
-});
-
-lsystem.loadProgram({
-  name: "fern",
-  axiom: "X",
-  rules: { X: "F+[[X]-X]-F[-FX]+X", F: "FF" },
-  angle: 25,
-  iterations: 5,
-});
-
-lsystem.loadProgram({
-  name: "dragon",
-  axiom: "FX",
-  rules: { X: "X+YF+", Y: "-FX-Y" },
-  angle: 90,
-  iterations: 10,
-});

@@ -1,4 +1,5 @@
 import Turtle, { TurtleEventHandler, TurtleState } from "../turtle";
+import fractals from "./programs.json";
 
 class Generator {
   axiom: string;
@@ -55,10 +56,12 @@ class Generator {
 export default class LSystem {
   turtleEventHandler: TurtleEventHandler;
   turtle: Turtle;
-  programs: Record<string, Generator>;
+  programs: Record<string, Generator> = {};
 
   constructor(turtleEventHandler: TurtleEventHandler) {
     this.turtle = new Turtle(turtleEventHandler);
+    console.log(fractals);
+    fractals.forEach((def) => this.loadProgram(def));
   }
 
   loadProgram({ name, axiom, rules, angle, iterations }) {
