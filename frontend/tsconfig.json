@@ -3,8 +3,6 @@
   "exclude": ["node_modules/*"],
   "compilerOptions": {
     "target": "es2019",
-    "moduleResolution": "node",
-    "resolveJsonModule": true,
-    "allowSyntheticDefaultImports": true
+    "moduleResolution": "node"
   }
 }

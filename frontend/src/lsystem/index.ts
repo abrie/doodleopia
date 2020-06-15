@@ -1,5 +1,5 @@
 import Turtle, { TurtleEventHandler, TurtleState } from "../turtle";
-import fractals from "./programs.json";
+import { fractals } from "./fractals";
 
 class Generator {
   axiom: string;
