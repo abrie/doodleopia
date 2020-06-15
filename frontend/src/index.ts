@@ -132,84 +132,65 @@ document.addEventListener("keyup", (event) => {
   console.log(event.keyCode);
   if (event.keyCode === 75) {
     // 'k'
-    lsystem.run(cursors.local, programs["koch"], { angle: 0, distance: 2 });
+    lsystem.run("koch", { point: cursors.local, angle: 0, distance: 2 });
   }
   if (event.keyCode === 83) {
     // 's'
-    lsystem.run(cursors.local, programs["sierpinski"], {
-      angle: 0,
-      distance: 2,
-    });
+    lsystem.run("sierpinski", { point: cursors.local, angle: 0, distance: 2 });
   }
   if (event.keyCode === 70) {
     // 'f'
-    lsystem.run(cursors.local, programs["fern"], { angle: 180, distance: 10 });
+    lsystem.run("fern", { point: cursors.local, angle: 180, distance: 10 });
   }
   if (event.keyCode === 68) {
-    // 'f'
-    lsystem.run(cursors.local, programs["dragon"], {
-      angle: 0,
-      distance: 10,
-    });
+    // 'd'
+    lsystem.run("dragon", { point: cursors.local, angle: 0, distance: 10 });
   }
 });
 
+const store = new Store();
+
+document
+  .getElementById("zoom")
+  .addEventListener(
+    "input",
+    (evt) => (canvas.zoom = parseFloat((evt.target as HTMLInputElement).value))
+  );
+
+document
+  .getElementById("send-button")
+  .addEventListener("click", () => store.store(canvas.svg));
+
 messages.open();
 
-const turtleEventHandler: TurtleEventHandler = {
-  onTurtleDown: (a: AttributedCoordinate) => penTracker.down(a),
-  onTurtleMove: (a: AttributedCoordinate) => penTracker.move(a),
-  onTurtleUp: (a: AttributedCoordinate) => penTracker.up(a),
-};
+lsystem.loadProgram({
+  name: "koch",
+  axiom: "F+F--F+F",
+  rules: { F: "F+F--F+F" },
+  angle: 60,
+  iterations: 3,
+});
 
-const lsystem = new LSystem(turtleEventHandler);
+lsystem.loadProgram({
+  name: "sierpinski",
+  axiom: "F-G-G",
+  rules: { F: "F-G+F+G-F", G: "GG" },
+  angle: 120,
+  iterations: 5,
+});
 
-const programs = {};
+lsystem.loadProgram({
+  name: "fern",
+  axiom: "X",
+  rules: { X: "F+[[X]-X]-F[-FX]+X", F: "FF" },
+  angle: 25,
+  iterations: 5,
+});
 
-lsystem
-  .loadProgram({
-    axiom: "F+F--F+F",
-    rules: { F: "F+F--F+F" },
-    angle: 60,
-    iterations: 3,
-  })
-  .then((program) => {
-    console.log("koch generated.");
-    programs["koch"] = program;
-  });
-
-lsystem
-  .loadProgram({
-    axiom: "F-G-G",
-    rules: { F: "F-G+F+G-F", G: "GG" },
-    angle: 120,
-    iterations: 5,
-  })
-  .then((program) => {
-    console.log("sierpinski generated.");
-    programs["sierpinski"] = program;
-  });
-
-lsystem
-  .loadProgram({
-    axiom: "X",
-    rules: { X: "F+[[X]-X]-F[-FX]+X", F: "FF" },
-    angle: 25,
-    iterations: 5,
-  })
-  .then((program) => {
-    console.log("fern generated.");
-    programs["fern"] = program;
-  });
-
-lsystem
-  .loadProgram({
-    axiom: "FX",
-    rules: { X: "X+YF+", Y: "-FX-Y" },
-    angle: 90,
-    iterations: 10,
-  })
-  .then((program) => {
-    console.log("dragon generated.");
-    programs["dragon"] = program;
-  });
+lsystem.loadProgram({
+  name: "dragon",
+  axiom: "FX",
+  rules: { X: "X+YF+", Y: "-FX-Y" },
+  angle: 90,
+  iterations: 10,
+});

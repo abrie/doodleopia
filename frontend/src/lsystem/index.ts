@@ -55,22 +55,25 @@ class Generator {
 export default class LSystem {
   turtleEventHandler: TurtleEventHandler;
   turtle: Turtle;
+  programs: Record<string, Generator>;
 
   constructor(turtleEventHandler: TurtleEventHandler) {
     this.turtle = new Turtle(turtleEventHandler);
   }
 
-  loadProgram({ axiom, rules, angle, iterations }) {
+  loadProgram({ name, axiom, rules, angle, iterations }) {
     return new Promise((resolve, reject) => {
       const generator = new Generator({ axiom, rules, angle });
       for (var i = 0; i < iterations; i++) {
         generator.iterate();
       }
+      this.programs[name] = generator;
       resolve(generator);
     });
   }
 
-  run(point, generator, { angle, distance }) {
+  run(name, { point, angle, distance }) {
+    const generator = this.programs[name];
     this.turtle.setTheta(angle);
     this.turtle.move(point);
     this.turtle.down();
