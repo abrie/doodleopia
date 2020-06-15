@@ -18,7 +18,7 @@ const messages = new Messages(<MessagesEventHandler>{
   onMessage: (message) => processMessage(message),
 });
 
-const cursors = new CursorTracker(<CursorTrackerEventHandler>{
+const cursorTracker = new CursorTracker(<CursorTrackerEventHandler>{
   onNewCursor: (cursor) => canvas.addCursor(cursor),
   onDeadCursor: (cursor) => canvas.removeCursor(cursor),
 });
