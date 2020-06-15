@@ -14,12 +14,17 @@ export interface PathTrackerEventHandler {
   onUpdatedPath: (path: AttributedCoordinates) => void;
 }
 
+interface PathTrackerConstructor {
+  eventHandler: PathTrackerEventHandler;
+  pathProcessor: PathProcessor;
+}
+
 export default class PathTracker {
   eventHandler: PathTrackerEventHandler;
   paths: Record<Attribution, Path> = {};
   pathProcessor: PathProcessor;
 
-  constructor({ eventHandler, pathProcessor }) {
+  constructor({ eventHandler, pathProcessor }: PathTrackerConstructor) {
     this.eventHandler = eventHandler;
     this.pathProcessor = pathProcessor;
   }
