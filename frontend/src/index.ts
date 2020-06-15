@@ -29,8 +29,9 @@ const polylines = new Polylines(<PolylineEventHandler>{
   onCanceledPolyline: (polyline) => canvas.cancelPolyline(polyline),
 });
 
-const pathTracker = new PathTracker(
-  <PathTrackerEventHandler>{
+const pathTracker = new PathTracker({
+  pathProcessor: pathProcessor,
+  eventHandler: <PathTrackerEventHandler>{
     onNewPath: ({ id, data }: AttributedCoordinates) => {
       polylines.startPolyline({ id, data });
     },
@@ -44,8 +45,7 @@ const pathTracker = new PathTracker(
       polylines.cancelPolyline({ id });
     },
   },
-  pathProcessor
-);
+});
 
 const canvas = new Canvas({
   target: document.getElementById("canvas"),
@@ -84,7 +84,7 @@ const penTracker = new PenTracker(<PenTrackerEventHandler>{
     });
   },
   onPenHover: (a: AttributedCoordinate) => {
-    cursors.local = a.data;
+    cursorTracker.local = a.data;
     messages.send({
       action: "cursor",
       ...a,
@@ -121,7 +121,7 @@ function processMessage({ clientId, action, id, data }: Message) {
       pathTracker.cancelPath(attributedCoordinate);
       break;
     case "cursor":
-      cursors.updateCursor(clientId, data);
+      cursorTracker.updateCursor(clientId, data);
       break;
     default:
       console.log(`Unknown message action: ${action}`);
@@ -132,19 +132,31 @@ document.addEventListener("keyup", (event) => {
   console.log(event.keyCode);
   if (event.keyCode === 75) {
     // 'k'
-    lsystem.run("koch", { point: cursors.local, angle: 0, distance: 2 });
+    lsystem.run("koch", { point: cursorTracker.local, angle: 0, distance: 2 });
   }
   if (event.keyCode === 83) {
     // 's'
-    lsystem.run("sierpinski", { point: cursors.local, angle: 0, distance: 2 });
+    lsystem.run("sierpinski", {
+      point: cursorTracker.local,
+      angle: 0,
+      distance: 2,
+    });
   }
   if (event.keyCode === 70) {
     // 'f'
-    lsystem.run("fern", { point: cursors.local, angle: 180, distance: 10 });
+    lsystem.run("fern", {
+      point: cursorTracker.local,
+      angle: 180,
+      distance: 10,
+    });
   }
   if (event.keyCode === 68) {
     // 'd'
-    lsystem.run("dragon", { point: cursors.local, angle: 0, distance: 10 });
+    lsystem.run("dragon", {
+      point: cursorTracker.local,
+      angle: 0,
+      distance: 10,
+    });
   }
 });
 

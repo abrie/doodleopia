@@ -19,10 +19,7 @@ export default class PathTracker {
   paths: Record<Attribution, Path> = {};
   pathProcessor: PathProcessor;
 
-  constructor(
-    eventHandler: PathTrackerEventHandler,
-    pathProcessor: PathProcessor
-  ) {
+  constructor({ eventHandler, pathProcessor }) {
     this.eventHandler = eventHandler;
     this.pathProcessor = pathProcessor;
   }
