@@ -4,7 +4,7 @@ import {
   PointerEventHandler,
   attachPointerEventHandler,
 } from "../pointerevents";
-import { createSvgElement, setSvgViewBox } from "./svg";
+import { createSvgElement, ViewBox, setSvgViewBox, zoomViewBox } from "./svg";
 
 interface CanvasInterface {
   startPolyline: (element: SVGElement) => void;
@@ -24,11 +24,13 @@ export default class Canvas implements CanvasInterface {
   finishedCanvas: SVGSVGElement = undefined;
   cursorCanvas: SVGSVGElement = undefined;
   zoomFactor: number;
+  baseViewBox: ViewBox = { left: 0, top: 0, width: 1600, height: 900 };
+  viewBox: ViewBox = { ...this.baseViewBox };
 
   constructor({ target, pointerEventHandler }: CanvasConstructor) {
-    this.workingCanvas = createSvgElement(1600, 900);
-    this.finishedCanvas = createSvgElement(1600, 900);
-    this.cursorCanvas = createSvgElement(1600, 900);
+    this.workingCanvas = createSvgElement(this.viewBox);
+    this.finishedCanvas = createSvgElement(this.viewBox);
+    this.cursorCanvas = createSvgElement(this.viewBox);
 
     target.appendChild(this.workingCanvas);
     target.appendChild(this.finishedCanvas);
@@ -64,11 +66,10 @@ export default class Canvas implements CanvasInterface {
 
   set zoom(f: number) {
     this.zoomFactor = f;
-    const width = 1600 * f;
-    const height = 900 * f;
-    setSvgViewBox(this.workingCanvas, 0, 0, width, height);
-    setSvgViewBox(this.finishedCanvas, 0, 0, width, height);
-    setSvgViewBox(this.cursorCanvas, 0, 0, width, height);
+    this.viewBox = zoomViewBox(this.baseViewBox, f);
+    setSvgViewBox(this.workingCanvas, this.viewBox);
+    setSvgViewBox(this.finishedCanvas, this.viewBox);
+    setSvgViewBox(this.cursorCanvas, this.viewBox);
   }
 
   get zoom(): number {
