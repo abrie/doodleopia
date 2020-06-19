@@ -8,6 +8,7 @@ import { createSvgElement, ViewBox, setSvgViewBox, zoomViewBox } from "./svg";
 
 interface CanvasInterface {
   startPolyline: (element: SVGElement) => void;
+  createPolyline: (element: SVGElement) => void;
   finishPolyline: (element: SVGElement) => void;
   cancelPolyline: (element: SVGElement) => void;
   addCursor: (element: SVGElement) => void;
@@ -20,12 +21,15 @@ interface CanvasConstructor {
 }
 
 export default class Canvas implements CanvasInterface {
+  target: HTMLElement;
   workingCanvas: SVGSVGElement = undefined;
   finishedCanvas: SVGSVGElement = undefined;
   cursorCanvas: SVGSVGElement = undefined;
   zoomFactor: number;
   baseViewBox: ViewBox = { left: 0, top: 0, width: 1600, height: 900 };
   viewBox: ViewBox = { ...this.baseViewBox };
+  domParser = new DOMParser();
+  xmlSerializer = new XMLSerializer();
 
   constructor({ target, pointerEventHandler }: CanvasConstructor) {
     this.workingCanvas = createSvgElement(this.viewBox);
@@ -35,6 +39,8 @@ export default class Canvas implements CanvasInterface {
     target.appendChild(this.workingCanvas);
     target.appendChild(this.finishedCanvas);
     target.appendChild(this.cursorCanvas);
+
+    this.target = target;
 
     attachPointerEventHandler(
       target,
@@ -52,6 +58,10 @@ export default class Canvas implements CanvasInterface {
     this.finishedCanvas.appendChild(el);
   }
 
+  createPolyline(el: SVGElement): void {
+    this.finishedCanvas.appendChild(el);
+  }
+
   cancelPolyline(el: SVGElement): void {
     this.workingCanvas.removeChild(el);
   }
@@ -64,6 +74,20 @@ export default class Canvas implements CanvasInterface {
     this.cursorCanvas.removeChild(el);
   }
 
+  set content(text: string) {
+    const dom = this.domParser.parseFromString(text, "image/svg+xml");
+    const svg = document.adoptNode(dom.documentElement);
+    this.workingCanvas = createSvgElement(this.viewBox);
+    this.finishedCanvas = createSvgElement(this.viewBox);
+    this.cursorCanvas = createSvgElement(this.viewBox);
+
+    this.finishedCanvas.parentNode.replaceChild(svg, this.finishedCanvas);
+  }
+
+  get content(): string {
+    return this.xmlSerializer.serializeToString(this.finishedCanvas);
+  }
+
   set zoom(f: number) {
     this.zoomFactor = f;
     this.viewBox = zoomViewBox(this.baseViewBox, f);
@@ -74,9 +98,5 @@ export default class Canvas implements CanvasInterface {
 
   get zoom(): number {
     return this.zoomFactor;
-  }
-
-  get svg(): string {
-    return new XMLSerializer().serializeToString(this.finishedCanvas);
   }
 }

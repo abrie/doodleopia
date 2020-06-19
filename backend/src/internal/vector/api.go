@@ -13,8 +13,7 @@ type PostResponse struct {
 
 type CommandStore struct {
 	Filename string `json:"filename"`
-	Svg      string `json:"svg"`
-	Json     string `json:"json"`
+	Content  string `json:"content"`
 }
 
 type ResultStore struct {
@@ -26,5 +25,5 @@ type CommandIndex struct {
 
 type ResultIndex struct {
 	Error     string   `json:"error,omitempty"`
-	Filenames []string `json:"filenames,omitempty"`
+	Filenames []string `json:"filenames"`
 }

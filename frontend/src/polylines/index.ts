@@ -4,6 +4,7 @@ export interface PolylineEventHandler {
   onFinishedPolyline: (el: SVGElement) => void;
   onNewPolyline: (el: SVGElement) => void;
   onCanceledPolyline: (el: SVGElement) => void;
+  onCreatedPolyline: (el: SVGElement) => void;
 }
 
 export default class Polylines {
@@ -23,6 +24,11 @@ export default class Polylines {
     const polyline = this.polylines[id];
     this.eventHandler.onFinishedPolyline(polyline);
     delete this.polylines[id];
+  }
+
+  createPolyline(attributedCoordinates: AttributedCoordinates) {
+    const polyline = NewPolyline(attributedCoordinates);
+    this.eventHandler.onCreatedPolyline(polyline);
   }
 
   updatePolyline({ id, data }: AttributedCoordinates) {
@@ -48,10 +54,24 @@ function coordToString([x, y]: Coordinate) {
   return `${x},${y}`;
 }
 
-function NewPolyline(): SVGElement {
+function coordsToString(attributedCoordinates: AttributedCoordinates): string {
+  if (attributedCoordinates) {
+    return attributedCoordinates.data.map(coordToString).join(",");
+  } else {
+    return "";
+  }
+}
+
+function NewPolyline(
+  attributedCoordinates?: AttributedCoordinates
+): SVGElement {
   const xmlns = "http://www.w3.org/2000/svg";
   const polyline = document.createElementNS(xmlns, "polyline");
-  polyline.setAttributeNS(null, "points", "");
+  polyline.setAttributeNS(
+    null,
+    "points",
+    coordsToString(attributedCoordinates)
+  );
   polyline.setAttributeNS(null, "fill", "none");
   polyline.setAttributeNS(null, "stroke", "black");
   polyline.setAttributeNS(null, "stroke-linejoin", "round");

@@ -35,16 +35,35 @@ function callService(url, args) {
 
 interface StoreInterface {
   store: (svg: string) => void;
+  index: () => void;
 }
 
 export default class Store implements StoreInterface {
   constructor() {}
 
-  store(svg: string) {
-    callService("/api/vector/", {
-      filename: "content.svg",
-      svg,
-      json: "jsoncontent",
-    }).then(() => console.log("stored"));
+  async store(json: string) {
+    console.log(json);
+    return callService("/api/vector/", {
+      store: {
+        filename: "saved.json",
+        content: json,
+      },
+    });
+  }
+
+  async index() {
+    return callService("/api/vector/", {
+      index: {},
+    }).then(({ index }) => index);
+  }
+
+  async get(filename): Promise<[]> {
+    const fetchParams = {
+      method: "GET",
+    };
+
+    return fetch(`/api/vector/${filename}`, fetchParams)
+      .then(checkHttpErrors)
+      .then((response) => response.json());
   }
 }

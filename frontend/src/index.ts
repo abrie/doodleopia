@@ -11,6 +11,8 @@ import { pathProcessor } from "./pathprocessor";
 import { TurtleEventHandler } from "./turtle";
 import LSystem from "./lsystem";
 
+const pathRecord: AttributedCoordinates[] = [];
+
 const messages = new Messages(<MessagesEventHandler>{
   onOpen: () => console.log("connection open"),
   onClose: () => console.log("connection closed"),
@@ -27,6 +29,7 @@ const polylines = new Polylines(<PolylineEventHandler>{
   onNewPolyline: (polyline) => canvas.startPolyline(polyline),
   onFinishedPolyline: (polyline) => canvas.finishPolyline(polyline),
   onCanceledPolyline: (polyline) => canvas.cancelPolyline(polyline),
+  onCreatedPolyline: (polyline) => canvas.createPolyline(polyline),
 });
 
 const pathTracker = new PathTracker({
@@ -37,12 +40,16 @@ const pathTracker = new PathTracker({
     },
     onFinishedPath: ({ id, data }: AttributedCoordinates) => {
       polylines.finishPolyline({ id, data });
+      pathRecord.push({ id, data });
     },
     onUpdatedPath: ({ id, data }: AttributedCoordinates) => {
       polylines.updatePolyline({ id, data });
     },
     onCanceledPath: ({ id }: AttributedCoordinates) => {
       polylines.cancelPolyline({ id });
+    },
+    onCreatedPath: ({ id, data }: AttributedCoordinates) => {
+      polylines.createPolyline({ id, data });
     },
   },
 });
@@ -160,16 +167,44 @@ document.addEventListener("keyup", (event) => {
   }
 });
 
-const store = new Store();
-messages.open();
+function run() {
+  const store = new Store();
 
-document
-  .getElementById("zoom")
-  .addEventListener(
-    "input",
-    (evt) => (canvas.zoom = parseFloat((evt.target as HTMLInputElement).value))
-  );
+  store.index().then((index) => {
+    const els = index.filenames.map((filename) => {
+      const el = document.createElement("option");
+      el.setAttribute("value", filename);
+      el.text = filename;
+      return el;
+    });
+    els.forEach((el) => document.getElementById("selector").appendChild(el));
+  });
 
-document
-  .getElementById("send-button")
-  .addEventListener("click", () => store.store(canvas.svg));
+  messages.open();
+
+  document
+    .getElementById("zoom")
+    .addEventListener(
+      "input",
+      (evt) =>
+        (canvas.zoom = parseFloat((evt.target as HTMLInputElement).value))
+    );
+
+  document
+    .getElementById("store-button")
+    .addEventListener("click", () => store.store(JSON.stringify(pathRecord)));
+
+  document
+    .getElementById("selector")
+    .addEventListener("change", ({ target: { value } }) => {
+      pathRecord.length = 0;
+      store.get(value).then((paths) =>
+        paths.forEach((path) => {
+          pathRecord.push(path);
+          pathTracker.createPath(path);
+        })
+      );
+    });
+}
+
+run();

@@ -12,6 +12,7 @@ export interface PathTrackerEventHandler {
   onNewPath: (path: AttributedCoordinates) => void;
   onCanceledPath: (path: AttributedCoordinates) => void;
   onUpdatedPath: (path: AttributedCoordinates) => void;
+  onCreatedPath: (path: AttributedCoordinates) => void;
 }
 
 interface PathTrackerConstructor {
@@ -53,6 +54,18 @@ export default class PathTracker {
   finishPath(a: AttributedCoordinate) {
     this.updatePath(a);
     this.eventHandler.onFinishedPath(this.paths[a.id]);
+  }
+
+  createPath({ id, data }: AttributedCoordinates) {
+    const constructor: PathConstructor = {
+      id,
+      raw: data,
+      data: data,
+      processor: this.pathProcessor,
+    };
+
+    const path = new Path(constructor);
+    this.eventHandler.onCreatedPath(path);
   }
 
   cancelPath({ id }: AttributedCoordinate) {

@@ -60,7 +60,6 @@ export default class LSystem {
 
   constructor(turtleEventHandler: TurtleEventHandler) {
     this.turtle = new Turtle(turtleEventHandler);
-    console.log(fractals);
     fractals.forEach((def) => this.loadProgram(def));
   }
 

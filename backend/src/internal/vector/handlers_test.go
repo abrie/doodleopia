@@ -74,8 +74,7 @@ func TestWriteError(t *testing.T) {
 	request := PostRequest{
 		CommandStore: &CommandStore{
 			Filename: "filename.ext",
-			Svg:      "<svg></svg>",
-			Json:     "{}"}}
+			Content:  "{}"}}
 
 	bodyBytes, err := json.Marshal(request)
 	if err != nil {
@@ -108,7 +107,7 @@ func TestPostCommandStore(t *testing.T) {
 	rr := httptest.NewRecorder()
 
 	request := PostRequest{CommandStore: &CommandStore{
-		Filename: "filename.ext", Svg: "<svg></svg>", Json: "{}"}}
+		Filename: "filename.ext", Content: "{}"}}
 
 	bodyBytes, err := json.Marshal(request)
 	if err != nil {
@@ -344,7 +343,7 @@ func TestGetSVG(t *testing.T) {
 	}
 
 	store := Store{Directory: dir}
-	if err := store.WriteSVG("abc.def", "svg-string-here"); err != nil {
+	if err := store.WriteJSON("abc.def", "svg-string-here"); err != nil {
 		t.Fatal(err)
 	}
 
@@ -395,22 +394,4 @@ func TestGetJSON(t *testing.T) {
 		t.Error(err)
 	}
 	defer os.RemoveAll(dir)
-}
-
-func TestSvgFilenameConversion(t *testing.T) {
-	want := "filename.svg"
-	got := svgFilename("../../filename.svg")
-
-	if want != got {
-		t.Error(fmt.Errorf("Got=`%s`; Want=`%s`", got, want))
-	}
-}
-
-func TestJsonFilenameConversion(t *testing.T) {
-	want := "filename.json"
-	got := svgFilename("../../filename.json")
-
-	if want != got {
-		t.Error(fmt.Errorf("Got=`%s`; Want=`%s`", got, want))
-	}
 }

@@ -21,7 +21,7 @@ func TestWrite(t *testing.T) {
 	}
 
 	store := Store{Directory: dir}
-	if err := store.WriteSVG("abc.def", "svg-string-here"); err != nil {
+	if err := store.WriteJSON("abc.def", "svg-string-here"); err != nil {
 		t.Fatal(err)
 	}
 
@@ -50,7 +50,7 @@ func TestIndex(t *testing.T) {
 	want := []string{"a.svg", "b.svg", "c.svg"}
 
 	for _, filename := range want {
-		if err := store.WriteSVG(filename, "svg-string-here"); err != nil {
+		if err := store.WriteJSON(filename, "svg-string-here"); err != nil {
 			t.Fatal(err)
 		}
 	}

@@ -6,24 +6,14 @@ import (
 	"io"
 	"log"
 	"net/http"
-	"path"
 	"path/filepath"
 	"strconv"
-	"strings"
 )
 
 const (
 	ErrorFailedToParse = "Failed to parse body."
 	ErrorMissingBody   = "Missing request body."
 )
-
-func svgFilename(input string) string {
-	return path.Base(input)
-}
-
-func jsonFilename(filename string) string {
-	return path.Base(strings.TrimSuffix(filename, ".svg") + ".json")
-}
 
 func ApplyPostRequest(store Interface, request *PostRequest) PostResponse {
 	var response PostResponse
@@ -40,11 +30,7 @@ func ApplyPostRequest(store Interface, request *PostRequest) PostResponse {
 }
 
 func ApplyCommandStore(store Interface, cmd *CommandStore) *ResultStore {
-	if err := store.WriteSVG(svgFilename(cmd.Filename), cmd.Svg); err != nil {
-		return &ResultStore{Error: err.Error()}
-	}
-
-	if err := store.WriteJSON(jsonFilename(cmd.Filename), cmd.Json); err != nil {
+	if err := store.WriteJSON(cmd.Filename, cmd.Content); err != nil {
 		return &ResultStore{Error: err.Error()}
 	}
 

@@ -9,7 +9,6 @@ import (
 )
 
 type Interface interface {
-	WriteSVG(filename, svg string) error
 	WriteJSON(filename, json string) error
 	PathFor(filename string) string
 	GetIndex() ([]string, error)
@@ -33,7 +32,7 @@ func (s *Store) GetIndex() ([]string, error) {
 		return []string{}, fmt.Errorf("Failed to index the store.")
 	}
 
-	var result []string
+	result := []string{}
 	for _, file := range files {
 		result = append(result, file.Name())
 	}
@@ -43,32 +42,6 @@ func (s *Store) GetIndex() ([]string, error) {
 
 func (store *Store) PathFor(base string) string {
 	return path.Join(store.Directory, base)
-}
-
-func (store *Store) WriteSVG(filename, content string) error {
-	pathname, err := store.CreateStore()
-	if err != nil {
-		return fmt.Errorf("Failed to create folder for SVG: %s", err.Error())
-	}
-
-	output := path.Join(pathname, filename)
-
-	f, err := os.Create(output)
-	if err != nil {
-		return fmt.Errorf("Failed to create file for SVG: %s", err.Error())
-	}
-
-	cnt, err := f.WriteString(content)
-	if err != nil {
-		return fmt.Errorf("Failed to write SVG to file: %s", err.Error())
-	}
-
-	log.Printf("Wrote SVG file (%s) to disk, sized %d bytes.", filename, cnt)
-
-	f.Sync()
-	f.Close()
-
-	return nil
 }
 
 func (store *Store) WriteJSON(filename, content string) error {
