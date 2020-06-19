@@ -26,15 +26,38 @@ func jsonFilename(filename string) string {
 }
 
 func ApplyPostRequest(store Interface, request *PostRequest) PostResponse {
-	if err := store.WriteSVG(svgFilename(request.Filename), request.Svg); err != nil {
-		return PostResponse{Error: err.Error()}
+	var response PostResponse
+
+	if request.CommandStore != nil {
+		response.ResultStore = ApplyCommandStore(store, request.CommandStore)
 	}
 
-	if err := store.WriteJSON(jsonFilename(request.Filename), request.Json); err != nil {
-		return PostResponse{Error: err.Error()}
+	if request.CommandIndex != nil {
+		response.ResultIndex = ApplyCommandIndex(store, request.CommandIndex)
 	}
 
-	return PostResponse{Result: "success"}
+	return response
+}
+
+func ApplyCommandStore(store Interface, cmd *CommandStore) *ResultStore {
+	if err := store.WriteSVG(svgFilename(cmd.Filename), cmd.Svg); err != nil {
+		return &ResultStore{Error: err.Error()}
+	}
+
+	if err := store.WriteJSON(jsonFilename(cmd.Filename), cmd.Json); err != nil {
+		return &ResultStore{Error: err.Error()}
+	}
+
+	return &ResultStore{}
+}
+
+func ApplyCommandIndex(store Interface, cmd *CommandIndex) *ResultIndex {
+	index, err := store.GetIndex()
+	if err != nil {
+		return &ResultIndex{Error: err.Error()}
+	}
+
+	return &ResultIndex{Filenames: index}
 }
 
 func WritePostResponse(w http.ResponseWriter, response PostResponse) {

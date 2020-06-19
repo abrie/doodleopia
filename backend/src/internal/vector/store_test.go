@@ -39,3 +39,30 @@ func TestWrite(t *testing.T) {
 
 	defer os.RemoveAll(dir)
 }
+
+func TestIndex(t *testing.T) {
+	dir, err := ioutil.TempDir("", "vector-store-test")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	store := Store{Directory: dir}
+	want := []string{"a.svg", "b.svg", "c.svg"}
+
+	for _, filename := range want {
+		if err := store.WriteSVG(filename, "svg-string-here"); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	got, err := store.GetIndex()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(got) != len(want) {
+		t.Errorf("Expected %d files, got %d.", len(want), len(got))
+	}
+
+	defer os.RemoveAll(dir)
+}

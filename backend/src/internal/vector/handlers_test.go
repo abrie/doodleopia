@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -52,21 +51,13 @@ func checkBody(wantBody string) checkFunc {
 
 func checkPostResponse(wantBody PostResponse) checkFunc {
 	return func(response *httptest.ResponseRecorder) error {
-		bodyBytes, err := ioutil.ReadAll(response.Result().Body)
-		if err != nil {
-			return err
-		}
-
-		log.Println(string(bodyBytes))
 		var body PostResponse
-		err = json.Unmarshal(bodyBytes, &body)
-		if err != nil {
-			log.Println("Failed to unmarshal JSON")
-			return err
+		if err := json.NewDecoder(response.Result().Body).Decode(&body); err != nil {
+			return fmt.Errorf("Failed to unmarshal JSON: %v", err)
 		}
 
 		if cmp.Equal(wantBody, body) != true {
-			return fmt.Errorf("Body=%s; Want=%s", body, wantBody)
+			return fmt.Errorf("Body=%v; Want=%v", body, wantBody)
 		}
 
 		return nil
@@ -80,7 +71,12 @@ func TestWriteError(t *testing.T) {
 
 	rr := httptest.NewRecorder()
 
-	request := PostRequest{Filename: "filename.ext", Svg: "<svg></svg>", Json: "{}"}
+	request := PostRequest{
+		CommandStore: &CommandStore{
+			Filename: "filename.ext",
+			Svg:      "<svg></svg>",
+			Json:     "{}"}}
+
 	bodyBytes, err := json.Marshal(request)
 	if err != nil {
 		t.Fatal(err)
@@ -98,17 +94,22 @@ func TestWriteError(t *testing.T) {
 		t.Error(err)
 	}
 
-	expected := PostResponse{Error: "this is an expected error"}
+	expected := PostResponse{
+		ResultStore: &ResultStore{
+			Error: "this is an expected error"}}
+
 	if err := checkPostResponse(expected)(rr); err != nil {
 		t.Error(err)
 	}
 }
 
-func TestValidPost(t *testing.T) {
+func TestPostCommandStore(t *testing.T) {
 	store := &MockStore{}
 	rr := httptest.NewRecorder()
 
-	request := PostRequest{Filename: "filename.ext", Svg: "<svg></svg>", Json: "{}"}
+	request := PostRequest{CommandStore: &CommandStore{
+		Filename: "filename.ext", Svg: "<svg></svg>", Json: "{}"}}
+
 	bodyBytes, err := json.Marshal(request)
 	if err != nil {
 		t.Fatal(err)
@@ -126,7 +127,84 @@ func TestValidPost(t *testing.T) {
 		t.Error(err)
 	}
 
-	expected := PostResponse{Result: "success"}
+	expected := PostResponse{ResultStore: &ResultStore{Error: ""}}
+	if err := checkPostResponse(expected)(rr); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestPostCommandIndex(t *testing.T) {
+	want := []string{"file1.svg", "file2.svg", "file3.svg"}
+
+	store := &MockStore{
+		MockIndexResult: want,
+	}
+
+	cmd := PostRequest{CommandIndex: &CommandIndex{}}
+
+	cmdBytes, err := json.Marshal(cmd)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	req, err := http.NewRequest("POST", "/", bytes.NewBuffer(cmdBytes))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	rr := httptest.NewRecorder()
+
+	handler := PostHandler(store)
+
+	handler.ServeHTTP(rr, req)
+
+	if err := checkStatus(http.StatusOK)(rr); err != nil {
+		t.Error(err)
+	}
+
+	if err := checkContentType("application/json")(rr); err != nil {
+		t.Error(err)
+	}
+
+	expected := PostResponse{ResultIndex: &ResultIndex{Filenames: want}}
+	if err := checkPostResponse(expected)(rr); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestPostCommandIndexError(t *testing.T) {
+	want := "this is an expected store index error."
+	store := &MockStore{
+		MockIndexError: want,
+	}
+
+	cmd := PostRequest{CommandIndex: &CommandIndex{}}
+
+	cmdBytes, err := json.Marshal(cmd)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	req, err := http.NewRequest("POST", "/", bytes.NewBuffer(cmdBytes))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	rr := httptest.NewRecorder()
+
+	handler := PostHandler(store)
+
+	handler.ServeHTTP(rr, req)
+
+	if err := checkStatus(http.StatusOK)(rr); err != nil {
+		t.Error(err)
+	}
+
+	if err := checkContentType("application/json")(rr); err != nil {
+		t.Error(err)
+	}
+
+	expected := PostResponse{ResultIndex: &ResultIndex{Error: want}}
 	if err := checkPostResponse(expected)(rr); err != nil {
 		t.Error(err)
 	}
@@ -215,7 +293,7 @@ func TestGetPlaceholder(t *testing.T) {
 		t.Error(err)
 	}
 
-	wantBody := `<svg viewBox="0 0 130 202" xmlns="http://www.w3.org/2000/svg"></svg>`
+	wantBody := `<svg viewBox="0,0,130,202" xmlns="http://www.w3.org/2000/svg"></svg>`
 	if err := checkBody(wantBody)(rr); err != nil {
 		t.Error(err)
 	}

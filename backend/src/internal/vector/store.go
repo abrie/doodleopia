@@ -2,6 +2,7 @@ package vector
 
 import (
 	"fmt"
+	"io/ioutil"
 	"log"
 	"os"
 	"path"
@@ -11,21 +12,11 @@ type Interface interface {
 	WriteSVG(filename, svg string) error
 	WriteJSON(filename, json string) error
 	PathFor(filename string) string
+	GetIndex() ([]string, error)
 }
 
 type Store struct {
 	Directory string
-}
-
-type PostRequest struct {
-	Filename string `json:"filename"`
-	Svg      string `json:"svg"`
-	Json     string `json:"json"`
-}
-
-type PostResponse struct {
-	Result string `json:"result,omitempty"`
-	Error  string `json:"error,omitempty"`
 }
 
 func (s *Store) CreateStore(parts ...string) (string, error) {
@@ -33,6 +24,21 @@ func (s *Store) CreateStore(parts ...string) (string, error) {
 	pathname := path.Join(pathparts...)
 	err := os.MkdirAll(pathname, 0755)
 	return pathname, err
+}
+
+func (s *Store) GetIndex() ([]string, error) {
+	files, err := ioutil.ReadDir(s.Directory)
+	if err != nil {
+		log.Printf("ReadDir returned an error: %v", err)
+		return []string{}, fmt.Errorf("Failed to index the store.")
+	}
+
+	var result []string
+	for _, file := range files {
+		result = append(result, file.Name())
+	}
+
+	return result, nil
 }
 
 func (store *Store) PathFor(base string) string {
