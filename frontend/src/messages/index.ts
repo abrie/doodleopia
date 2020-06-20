@@ -22,6 +22,7 @@ export default class implements MessagesInterface {
   clientId: string = uuidv4();
   eventHandler: MessagesEventHandler;
   conn: WebSocket;
+  timerId: number | undefined;
 
   constructor(eventHandler: MessagesEventHandler) {
     this.eventHandler = eventHandler;
@@ -34,9 +35,15 @@ export default class implements MessagesInterface {
 
   open() {
     this.conn = new WebSocket(this.url);
-    this.conn.onopen = (evt) => this.eventHandler.onOpen();
+    this.conn.onopen = (evt) => {
+      window.clearTimeout(this.timerId);
+      this.eventHandler.onOpen();
+    };
     this.conn.onerror = (evt) => this.eventHandler.onError();
-    this.conn.onclose = (evt) => this.eventHandler.onClose();
+    this.conn.onclose = (evt) => {
+      this.timerId = window.setTimeout(() => this.open(), 250);
+      this.eventHandler.onClose();
+    };
     this.conn.onmessage = (evt) => this.receive(evt.data);
   }
 

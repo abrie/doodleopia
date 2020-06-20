@@ -17,13 +17,13 @@ function run() {
   attachUIEventHandlers();
 }
 
-function indicateConnectionStatus(connected) {
-  document.getElementById("logo").classList.toggle("connected", connected);
-}
-
 const store = new Store(<StoreEventHandler>{
   onPathRecord: (path) => pathTracker.createPath(path),
 });
+
+function indicateConnectionStatus(connected) {
+  document.getElementById("logo").classList.toggle("connected", connected);
+}
 
 const messages = new Messages(<MessagesEventHandler>{
   onOpen: () => indicateConnectionStatus(true),
