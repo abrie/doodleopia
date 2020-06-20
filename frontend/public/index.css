@@ -1,5 +1,6 @@
 html {
   box-sizing: border-box;
+  --left-bar-width: 100px;
 }
 *,
 *:before,
@@ -7,38 +8,62 @@ html {
   box-sizing: inherit;
 }
 
-h1 {
+#app {
+  width: calc(100vw - var(--left-bar-width));
+  height: calc(100vh - 100px);
+  display: grid;
+  grid-template-columns: var(--left-bar-width) auto;
+  grid-template-rows: 40px auto 50px;
+}
+
+#logo {
   color: white;
   margin: 0;
-  font-size: 140%;
   background: #444;
   padding: 3px 5px 0px 5px;
   max-width: 30%;
-  align-self: flex-start;
   border: 3px solid #444;
   border-width: 3px 3px 0px 3px;
   border-radius: 5px 5px 0px 0px;
+  grid-column: 2 / 2;
+  grid-row: 1 /1;
+  font-size: 200%;
+  align-self: center;
+  height: 100%;
+  text-overflow: ellipsis;
+  overflow: hidden;
 }
 
 #controls {
-  width: 80%;
+  align-self: center;
+  grid-column: 2 / 2;
+  grid-row: 3 / 3;
+}
+
+#toolbar {
+  justify-self: center;
+  align-self: end;
+  grid-column: 1 / 1;
+  grid-row: 2 / 2;
+  background: #666;
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+}
+
+#toolbar button {
+  display: block;
+  width: 90%;
 }
 
 #zoom {
   width: 100%;
 }
 
-#app {
-  display: flex;
-  flex-flow: column nowrap;
-  align-items: center;
-  max-width: 500px;
-  margin: 0 auto;
-}
-
 #canvas {
+  grid-column: 2 / 2;
+  grid-row: 2 / 2;
   width: 100%;
-  align-self: center;
+  justify-self: center;
   position: relative;
   padding-top: 56.25%;
   cursor: crosshair;
