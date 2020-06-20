@@ -11,14 +11,24 @@ import { pathProcessor } from "./pathprocessor";
 import { TurtleEventHandler } from "./turtle";
 import LSystem from "./lsystem";
 
+function run() {
+  messages.open();
+  store.restorePathRecord();
+  attachUIEventHandlers();
+}
+
+function indicateConnectionStatus(connected) {
+  document.getElementById("logo").classList.toggle("connected", connected);
+}
+
 const store = new Store(<StoreEventHandler>{
   onPathRecord: (path) => pathTracker.createPath(path),
 });
 
 const messages = new Messages(<MessagesEventHandler>{
-  onOpen: () => console.log("connection open"),
-  onClose: () => console.log("connection closed"),
-  onError: () => console.log("connection error"),
+  onOpen: () => indicateConnectionStatus(true),
+  onClose: () => indicateConnectionStatus(false),
+  onError: () => indicateConnectionStatus(false),
   onMessage: (message) => processMessage(message),
 });
 
@@ -137,41 +147,7 @@ function processMessage({ clientId, action, id, data }: Message) {
   }
 }
 
-document.addEventListener("keyup", (event) => {
-  if (event.keyCode === 75) {
-    // 'k'
-    lsystem.run("koch", { point: cursorTracker.local, angle: 0, distance: 2 });
-  }
-  if (event.keyCode === 83) {
-    // 's'
-    lsystem.run("sierpinski", {
-      point: cursorTracker.local,
-      angle: 0,
-      distance: 2,
-    });
-  }
-  if (event.keyCode === 70) {
-    // 'f'
-    lsystem.run("fern", {
-      point: cursorTracker.local,
-      angle: 180,
-      distance: 10,
-    });
-  }
-  if (event.keyCode === 68) {
-    // 'd'
-    lsystem.run("dragon", {
-      point: cursorTracker.local,
-      angle: 0,
-      distance: 10,
-    });
-  }
-});
-
-function run() {
-  messages.open();
-  store.restorePathRecord();
-
+function attachUIEventHandlers() {
   document
     .getElementById("zoom")
     .addEventListener(
@@ -192,6 +168,41 @@ function run() {
   document
     .getElementById("restore-button")
     .addEventListener("click", () => store.restorePathRecord());
+
+  document.addEventListener("keyup", (event) => {
+    if (event.keyCode === 75) {
+      // 'k'
+      lsystem.run("koch", {
+        point: cursorTracker.local,
+        angle: 0,
+        distance: 2,
+      });
+    }
+    if (event.keyCode === 83) {
+      // 's'
+      lsystem.run("sierpinski", {
+        point: cursorTracker.local,
+        angle: 0,
+        distance: 2,
+      });
+    }
+    if (event.keyCode === 70) {
+      // 'f'
+      lsystem.run("fern", {
+        point: cursorTracker.local,
+        angle: 180,
+        distance: 10,
+      });
+    }
+    if (event.keyCode === 68) {
+      // 'd'
+      lsystem.run("dragon", {
+        point: cursorTracker.local,
+        angle: 0,
+        distance: 10,
+      });
+    }
+  });
 }
 
 run();

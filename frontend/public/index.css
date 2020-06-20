@@ -17,7 +17,7 @@ html {
 }
 
 #logo {
-  color: #aaa;
+  color: red;
   background: #333;
   padding: 8px 8px 0px 8px;
   max-width: 30%;
@@ -30,6 +30,10 @@ html {
   text-align: center;
   font-family: sans-serif;
   overflow: hidden;
+}
+
+#logo.connected {
+  color: #999;
 }
 
 #controls {
