@@ -17,20 +17,18 @@ html {
 }
 
 #logo {
-  color: white;
-  margin: 0;
-  background: #444;
-  padding: 3px 5px 0px 5px;
+  color: #aaa;
+  background: #333;
+  padding: 8px 8px 0px 8px;
   max-width: 30%;
-  border: 3px solid #444;
-  border-width: 3px 3px 0px 3px;
   border-radius: 5px 5px 0px 0px;
   grid-column: 2 / 2;
   grid-row: 1 /1;
-  font-size: 200%;
-  align-self: center;
-  height: 100%;
+  font-size: 130%;
+  align-self: end;
   text-overflow: ellipsis;
+  text-align: center;
+  font-family: sans-serif;
   overflow: hidden;
 }
 
@@ -67,7 +65,7 @@ html {
   position: relative;
   padding-top: 56.25%;
   cursor: crosshair;
-  border: 5px solid #444;
+  border: 2px solid #333;
   border-radius: 0px 5px 5px 5px;
 }
 
