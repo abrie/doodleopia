@@ -1,3 +1,5 @@
+import { AttributedCoordinates } from "../coordinates";
+
 function checkHttpErrors(response) {
   if (!response.ok) {
     return Promise.reject(new Error(response.statusText));
@@ -34,19 +36,47 @@ function callService(url, args) {
 }
 
 interface StoreInterface {
-  store: (svg: string) => void;
+  pushPathRecord: (data: AttributedCoordinates) => void;
+  clearPathRecord: () => void;
+  restorePathRecord: () => void;
   index: () => void;
 }
 
-export default class Store implements StoreInterface {
-  constructor() {}
+export interface StoreEventHandler {
+  onPathRecord: (attributedCoordinates: AttributedCoordinates) => void;
+}
 
-  async store(json: string) {
-    console.log(json);
+export default class Store implements StoreInterface {
+  pathRecord: AttributedCoordinates[] = [];
+  eventHandler: StoreEventHandler;
+
+  constructor(eventHandler: StoreEventHandler) {
+    this.eventHandler = eventHandler;
+  }
+
+  pushPathRecord(path) {
+    this.pathRecord.push(path);
+  }
+
+  clearPathRecord() {
+    this.pathRecord.length = 0;
+  }
+
+  restorePathRecord() {
+    this.get("stored.json").then((paths) => {
+      this.clearPathRecord();
+      paths.forEach((path) => {
+        this.pathRecord.push(path);
+        this.eventHandler.onPathRecord(path);
+      });
+    });
+  }
+
+  async persistPathRecord() {
     return callService("/api/vector/", {
       store: {
-        filename: "saved.json",
-        content: json,
+        filename: "stored.json",
+        content: JSON.stringify(this.pathRecord),
       },
     });
   }

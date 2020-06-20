@@ -6,12 +6,14 @@ import Polylines, { PolylineEventHandler } from "./polylines";
 import { PointerEventHandler } from "./pointerevents";
 import PathTracker, { PathTrackerEventHandler } from "./pathtracker";
 import Messages, { MessagesEventHandler, Message } from "./messages";
-import Store from "./store";
+import Store, { StoreEventHandler } from "./store";
 import { pathProcessor } from "./pathprocessor";
 import { TurtleEventHandler } from "./turtle";
 import LSystem from "./lsystem";
 
-const pathRecord: AttributedCoordinates[] = [];
+const store = new Store(<StoreEventHandler>{
+  onPathRecord: (path) => pathTracker.createPath(path),
+});
 
 const messages = new Messages(<MessagesEventHandler>{
   onOpen: () => console.log("connection open"),
@@ -40,7 +42,7 @@ const pathTracker = new PathTracker({
     },
     onFinishedPath: ({ id, data }: AttributedCoordinates) => {
       polylines.finishPolyline({ id, data });
-      pathRecord.push({ id, data });
+      store.pushPathRecord({ id, data });
     },
     onUpdatedPath: ({ id, data }: AttributedCoordinates) => {
       polylines.updatePolyline({ id, data });
@@ -136,7 +138,6 @@ function processMessage({ clientId, action, id, data }: Message) {
 }
 
 document.addEventListener("keyup", (event) => {
-  console.log(event.keyCode);
   if (event.keyCode === 75) {
     // 'k'
     lsystem.run("koch", { point: cursorTracker.local, angle: 0, distance: 2 });
@@ -168,19 +169,8 @@ document.addEventListener("keyup", (event) => {
 });
 
 function run() {
-  const store = new Store();
-
-  store.index().then((index) => {
-    const els = index.filenames.map((filename) => {
-      const el = document.createElement("option");
-      el.setAttribute("value", filename);
-      el.text = filename;
-      return el;
-    });
-    els.forEach((el) => document.getElementById("selector").appendChild(el));
-  });
-
   messages.open();
+  store.restorePathRecord();
 
   document
     .getElementById("zoom")
@@ -192,19 +182,16 @@ function run() {
 
   document
     .getElementById("store-button")
-    .addEventListener("click", () => store.store(JSON.stringify(pathRecord)));
+    .addEventListener("click", () => store.persistPathRecord());
+
+  document.getElementById("clear-button").addEventListener("click", () => {
+    canvas.clear();
+    store.clearPathRecord();
+  });
 
   document
-    .getElementById("selector")
-    .addEventListener("change", ({ target: { value } }) => {
-      pathRecord.length = 0;
-      store.get(value).then((paths) =>
-        paths.forEach((path) => {
-          pathRecord.push(path);
-          pathTracker.createPath(path);
-        })
-      );
-    });
+    .getElementById("restore-button")
+    .addEventListener("click", () => store.restorePathRecord());
 }
 
 run();

@@ -74,18 +74,10 @@ export default class Canvas implements CanvasInterface {
     this.cursorCanvas.removeChild(el);
   }
 
-  set content(text: string) {
-    const dom = this.domParser.parseFromString(text, "image/svg+xml");
-    const svg = document.adoptNode(dom.documentElement);
-    this.workingCanvas = createSvgElement(this.viewBox);
-    this.finishedCanvas = createSvgElement(this.viewBox);
-    this.cursorCanvas = createSvgElement(this.viewBox);
-
-    this.finishedCanvas.parentNode.replaceChild(svg, this.finishedCanvas);
-  }
-
-  get content(): string {
-    return this.xmlSerializer.serializeToString(this.finishedCanvas);
+  clear() {
+    const blankCanvas = createSvgElement(this.viewBox);
+    this.finishedCanvas.replaceWith(blankCanvas);
+    this.finishedCanvas = blankCanvas;
   }
 
   set zoom(f: number) {
