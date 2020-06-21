@@ -36,7 +36,7 @@ function callService(url, args) {
 }
 
 interface StoreInterface {
-  pushPathRecord: (data: AttributedCoordinates) => void;
+  pushAttributedCoordinates: (data: AttributedCoordinates) => void;
   clearPathRecord: () => void;
   restorePathRecord: () => void;
   index: () => void;
@@ -54,7 +54,7 @@ export default class Store implements StoreInterface {
     this.eventHandler = eventHandler;
   }
 
-  pushPathRecord(path) {
+  pushAttributedCoordinates(path) {
     this.pathRecord.push(path);
   }
 

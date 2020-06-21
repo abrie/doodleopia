@@ -46,21 +46,21 @@ const polylines = new Polylines(<PolylineEventHandler>{
 const pathTracker = new PathTracker({
   pathProcessor: pathProcessor,
   eventHandler: <PathTrackerEventHandler>{
-    onNewPath: ({ id, data }: AttributedCoordinates) => {
-      polylines.startPolyline({ id, data });
+    onNewPath: (a: AttributedCoordinates) => {
+      polylines.startPolyline(a);
     },
-    onFinishedPath: ({ id, data }: AttributedCoordinates) => {
-      polylines.finishPolyline({ id, data });
-      store.pushPathRecord({ id, data });
+    onFinishedPath: (a: AttributedCoordinates) => {
+      polylines.finishPolyline(a);
+      store.pushAttributedCoordinates(a);
     },
-    onUpdatedPath: ({ id, data }: AttributedCoordinates) => {
-      polylines.updatePolyline({ id, data });
+    onUpdatedPath: (a: AttributedCoordinates) => {
+      polylines.updatePolyline(a);
     },
-    onCanceledPath: ({ id }: AttributedCoordinates) => {
-      polylines.cancelPolyline({ id });
+    onCanceledPath: (a: AttributedCoordinates) => {
+      polylines.cancelPolyline(a);
     },
-    onCreatedPath: ({ id, data }: AttributedCoordinates) => {
-      polylines.createPolyline({ id, data });
+    onCreatedPath: (a: AttributedCoordinates) => {
+      polylines.createPolyline(a);
     },
   },
 });
