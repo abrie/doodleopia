@@ -21,14 +21,14 @@ const store = new Store(<StoreEventHandler>{
   onPathRecord: (path) => pathTracker.createPath(path),
 });
 
-function indicateConnectionStatus(connected) {
-  document.getElementById("logo").classList.toggle("connected", connected);
+function showConnectionStatus(isConnected: boolean) {
+  document.getElementById("logo").classList.toggle("connected", isConnected);
 }
 
 const messages = new Messages(<MessagesEventHandler>{
-  onOpen: () => indicateConnectionStatus(true),
-  onClose: () => indicateConnectionStatus(false),
-  onError: () => indicateConnectionStatus(false),
+  onOpen: () => showConnectionStatus(true),
+  onClose: () => showConnectionStatus(false),
+  onError: () => showConnectionStatus(false),
   onMessage: (message) => processMessage(message),
 });
 
