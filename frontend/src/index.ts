@@ -1,7 +1,7 @@
 import { AttributedCoordinate, AttributedCoordinates } from "./coordinates";
 import Canvas, { CanvasEventHandler } from "./canvas";
-import CursorTracker, { CursorTrackerEventHandler } from "./cursorTracker";
-import PenTracker, { PenTrackerEventHandler } from "./penTracker";
+import CursorTracker, { CursorTrackerEventHandler } from "./cursortracker";
+import PointerTracker, { PointerTrackerEventHandler } from "./pointertracker";
 import Polylines, { PolylineEventHandler } from "./polylines";
 import PathTracker, { PathTrackerEventHandler } from "./pathtracker";
 import Messages, { MessagesEventHandler, Message } from "./messages";
@@ -68,29 +68,29 @@ const pathTracker = new PathTracker({
 const canvas = new Canvas({
   target: document.getElementById("canvas"),
   eventHandler: <CanvasEventHandler>{
-    onPointerDown: (a: AttributedCoordinate) => penTracker.down(a),
-    onPointerUp: (a: AttributedCoordinate) => penTracker.up(a),
-    onPointerMove: (a: AttributedCoordinate) => penTracker.move(a),
-    onPointerCancel: (a: AttributedCoordinate) => penTracker.cancel(a),
+    onPointerDown: (a: AttributedCoordinate) => pointerTracker.down(a),
+    onPointerUp: (a: AttributedCoordinate) => pointerTracker.up(a),
+    onPointerMove: (a: AttributedCoordinate) => pointerTracker.move(a),
+    onPointerCancel: (a: AttributedCoordinate) => pointerTracker.cancel(a),
   },
 });
 
-const penTracker = new PenTracker(<PenTrackerEventHandler>{
-  onPenDown: (a: AttributedCoordinate) => {
+const pointerTracker = new PointerTracker(<PointerTrackerEventHandler>{
+  onPointerDown: (a: AttributedCoordinate) => {
     pathTracker.startPath(a);
     messages.send({
       action: "down",
       ...a,
     });
   },
-  onPenUp: (a: AttributedCoordinate) => {
+  onPointerUp: (a: AttributedCoordinate) => {
     pathTracker.finishPath(a);
     messages.send({
       action: "up",
       ...a,
     });
   },
-  onPenMove: (a: AttributedCoordinate) => {
+  onPointerMove: (a: AttributedCoordinate) => {
     pathTracker.updatePath(a);
     messages.send({
       action: "move",
@@ -101,23 +101,23 @@ const penTracker = new PenTracker(<PenTrackerEventHandler>{
       ...a,
     });
   },
-  onPenHover: (a: AttributedCoordinate) => {
+  onPointerHover: (a: AttributedCoordinate) => {
     cursorTracker.local = a.data;
     messages.send({
       action: "cursor",
       ...a,
     });
   },
-  onPenCancel: (a: AttributedCoordinate) => {
+  onPointerCancel: (a: AttributedCoordinate) => {
     pathTracker.cancelPath(a);
     messages.send({ action: "cancel", ...a });
   },
 });
 
 const lsystem = new LSystem(<TurtleEventHandler>{
-  onTurtleDown: (a: AttributedCoordinate) => penTracker.down(a),
-  onTurtleMove: (a: AttributedCoordinate) => penTracker.move(a),
-  onTurtleUp: (a: AttributedCoordinate) => penTracker.up(a),
+  onTurtleDown: (a: AttributedCoordinate) => pointerTracker.down(a),
+  onTurtleMove: (a: AttributedCoordinate) => pointerTracker.move(a),
+  onTurtleUp: (a: AttributedCoordinate) => pointerTracker.up(a),
 });
 
 function processMessage({ clientId, action, id, data }: Message) {

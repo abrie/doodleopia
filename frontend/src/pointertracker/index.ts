@@ -22,53 +22,53 @@ class DownTracker {
   }
 }
 
-export interface PenTrackerEventHandler {
-  onPenDown: (a: AttributedCoordinate) => void;
-  onPenMove: (a: AttributedCoordinate) => void;
-  onPenHover: (a: AttributedCoordinate) => void;
-  onPenUp: (a: AttributedCoordinate) => void;
-  onPenCancel: (a: AttributedCoordinate) => void;
+export interface PointerTrackerEventHandler {
+  onPointerDown: (a: AttributedCoordinate) => void;
+  onPointerMove: (a: AttributedCoordinate) => void;
+  onPointerHover: (a: AttributedCoordinate) => void;
+  onPointerUp: (a: AttributedCoordinate) => void;
+  onPointerCancel: (a: AttributedCoordinate) => void;
 }
 
-interface PenTrackerInterface {
+interface PointerTrackerInterface {
   down: (a: AttributedCoordinate) => void;
   up: (a: AttributedCoordinate) => void;
   move: (a: AttributedCoordinate) => void;
   cancel: (a: AttributedCoordinate) => void;
 }
 
-export default class PenTracker implements PenTrackerInterface {
+export default class PointerTracker implements PointerTrackerInterface {
   downTracker: DownTracker = new DownTracker();
-  eventHandler: PenTrackerEventHandler;
+  eventHandler: PointerTrackerEventHandler;
 
-  constructor(eventHandler: PenTrackerEventHandler) {
+  constructor(eventHandler: PointerTrackerEventHandler) {
     this.eventHandler = eventHandler;
   }
 
   down({ id, data }: AttributedCoordinate) {
     this.downTracker.set(id);
-    this.eventHandler.onPenDown({ id, data });
+    this.eventHandler.onPointerDown({ id, data });
   }
 
   up({ id, data }: AttributedCoordinate) {
     if (this.downTracker.has(id)) {
       this.downTracker.delete(id);
-      this.eventHandler.onPenUp({ id, data });
+      this.eventHandler.onPointerUp({ id, data });
     }
   }
 
   move({ id, data }: AttributedCoordinate) {
     if (this.downTracker.has(id)) {
-      this.eventHandler.onPenMove({ id, data });
+      this.eventHandler.onPointerMove({ id, data });
     } else {
-      this.eventHandler.onPenHover({ id, data });
+      this.eventHandler.onPointerHover({ id, data });
     }
   }
 
   cancel({ id }: AttributedCoordinate) {
     if (this.downTracker.has(id)) {
       this.downTracker.delete(id);
-      this.eventHandler.onPenCancel({ id });
+      this.eventHandler.onPointerCancel({ id });
     }
   }
 }
