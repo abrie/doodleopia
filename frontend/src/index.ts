@@ -16,70 +16,6 @@ function run() {
   attachUIEventHandlers();
 }
 
-const store = new Store(<StoreEventHandler>{
-  onPathRecord: (path) => pathTracker.createPath(path),
-});
-
-function showConnectionStatus(isConnected: boolean) {
-  document.getElementById("logo").classList.toggle("connected", isConnected);
-}
-
-const messages = new Messages(<MessagesEventHandler>{
-  onOpen: () => showConnectionStatus(true),
-  onClose: () => showConnectionStatus(false),
-  onError: () => showConnectionStatus(false),
-  onMessage: (message) => processMessage(message),
-});
-
-const cursorTracker = new CursorTracker(<CursorTrackerEventHandler>{
-  onNewCursor: (cursor) => canvas.addCursor(cursor),
-  onDeadCursor: (cursor) => canvas.removeCursor(cursor),
-});
-
-const polylines = new Polylines(<PolylineEventHandler>{
-  onNewPolyline: (polyline) => canvas.startPolyline(polyline),
-  onFinishedPolyline: (polyline) => canvas.finishPolyline(polyline),
-  onCanceledPolyline: (polyline) => canvas.cancelPolyline(polyline),
-  onCreatedPolyline: (polyline) => canvas.createPolyline(polyline),
-});
-
-const pathProcessor = new PathProcessor(<PathProcessorEventHandler>{
-  onNewPath: (a: AttributedCoordinates) => {
-    polylines.startPolyline(a);
-  },
-  onFinishedPath: (a: AttributedCoordinates) => {
-    polylines.finishPolyline(a);
-    store.pushAttributedCoordinates(a);
-  },
-  onUpdatedPath: (a: AttributedCoordinates) => {
-    polylines.updatePolyline(a);
-  },
-  onCanceledPath: (a: AttributedCoordinates) => {
-    polylines.cancelPolyline(a);
-  },
-  onCreatedPath: (a: AttributedCoordinates) => {
-    polylines.createPolyline(a);
-  },
-});
-
-const pathTracker = new PathTracker(<PathTrackerEventHandler>{
-  onNewPath: (a: AttributedCoordinates) => {
-    pathProcessor.startPath(a);
-  },
-  onFinishedPath: (a: AttributedCoordinates) => {
-    pathProcessor.finishPath(a);
-  },
-  onUpdatedPath: (a: AttributedCoordinates) => {
-    pathProcessor.updatePath(a);
-  },
-  onCanceledPath: (a: AttributedCoordinates) => {
-    pathProcessor.cancelPath(a);
-  },
-  onCreatedPath: (a: AttributedCoordinates) => {
-    pathProcessor.createPath(a);
-  },
-});
-
 const canvas = new Canvas({
   target: document.getElementById("canvas"),
   eventHandler: <CanvasEventHandler>{
@@ -128,6 +64,70 @@ const pointerTracker = new PointerTracker(<PointerTrackerEventHandler>{
     messages.send({ action: "cancel", ...a });
   },
 });
+
+const pathTracker = new PathTracker(<PathTrackerEventHandler>{
+  onNewPath: (a: AttributedCoordinates) => {
+    pathProcessor.startPath(a);
+  },
+  onFinishedPath: (a: AttributedCoordinates) => {
+    pathProcessor.finishPath(a);
+  },
+  onUpdatedPath: (a: AttributedCoordinates) => {
+    pathProcessor.updatePath(a);
+  },
+  onCanceledPath: (a: AttributedCoordinates) => {
+    pathProcessor.cancelPath(a);
+  },
+  onCreatedPath: (a: AttributedCoordinates) => {
+    pathProcessor.createPath(a);
+  },
+});
+
+const pathProcessor = new PathProcessor(<PathProcessorEventHandler>{
+  onNewPath: (a: AttributedCoordinates) => {
+    polylines.startPolyline(a);
+  },
+  onFinishedPath: (a: AttributedCoordinates) => {
+    polylines.finishPolyline(a);
+    store.pushAttributedCoordinates(a);
+  },
+  onUpdatedPath: (a: AttributedCoordinates) => {
+    polylines.updatePolyline(a);
+  },
+  onCanceledPath: (a: AttributedCoordinates) => {
+    polylines.cancelPolyline(a);
+  },
+  onCreatedPath: (a: AttributedCoordinates) => {
+    polylines.createPolyline(a);
+  },
+});
+
+const polylines = new Polylines(<PolylineEventHandler>{
+  onNewPolyline: (polyline) => canvas.startPolyline(polyline),
+  onFinishedPolyline: (polyline) => canvas.finishPolyline(polyline),
+  onCanceledPolyline: (polyline) => canvas.cancelPolyline(polyline),
+  onCreatedPolyline: (polyline) => canvas.createPolyline(polyline),
+});
+
+const cursorTracker = new CursorTracker(<CursorTrackerEventHandler>{
+  onNewCursor: (cursor) => canvas.addCursor(cursor),
+  onDeadCursor: (cursor) => canvas.removeCursor(cursor),
+});
+
+const store = new Store(<StoreEventHandler>{
+  onPathRecord: (path) => pathTracker.createPath(path),
+});
+
+const messages = new Messages(<MessagesEventHandler>{
+  onOpen: () => showConnectionStatus(true),
+  onClose: () => showConnectionStatus(false),
+  onError: () => showConnectionStatus(false),
+  onMessage: (message) => processMessage(message),
+});
+
+function showConnectionStatus(isConnected: boolean) {
+  document.getElementById("logo").classList.toggle("connected", isConnected);
+}
 
 const lsystem = new LSystem(<TurtleEventHandler>{
   onTurtleDown: (a: AttributedCoordinate) => pointerTracker.down(a),
