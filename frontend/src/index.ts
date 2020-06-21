@@ -6,7 +6,7 @@ import Polylines, { PolylineEventHandler } from "./polylines";
 import PathTracker, { PathTrackerEventHandler } from "./pathtracker";
 import Messages, { MessagesEventHandler, Message } from "./messages";
 import Store, { StoreEventHandler } from "./store";
-import { pathProcessor } from "./pathprocessor";
+import PathProcessor, { PathProcessorEventHandler } from "./pathprocessor";
 import { TurtleEventHandler } from "./turtle";
 import LSystem from "./lsystem";
 
@@ -43,25 +43,40 @@ const polylines = new Polylines(<PolylineEventHandler>{
   onCreatedPolyline: (polyline) => canvas.createPolyline(polyline),
 });
 
-const pathTracker = new PathTracker({
-  pathProcessor: pathProcessor,
-  eventHandler: <PathTrackerEventHandler>{
-    onNewPath: (a: AttributedCoordinates) => {
-      polylines.startPolyline(a);
-    },
-    onFinishedPath: (a: AttributedCoordinates) => {
-      polylines.finishPolyline(a);
-      store.pushAttributedCoordinates(a);
-    },
-    onUpdatedPath: (a: AttributedCoordinates) => {
-      polylines.updatePolyline(a);
-    },
-    onCanceledPath: (a: AttributedCoordinates) => {
-      polylines.cancelPolyline(a);
-    },
-    onCreatedPath: (a: AttributedCoordinates) => {
-      polylines.createPolyline(a);
-    },
+const pathProcessor = new PathProcessor(<PathProcessorEventHandler>{
+  onNewPath: (a: AttributedCoordinates) => {
+    polylines.startPolyline(a);
+  },
+  onFinishedPath: (a: AttributedCoordinates) => {
+    polylines.finishPolyline(a);
+    store.pushAttributedCoordinates(a);
+  },
+  onUpdatedPath: (a: AttributedCoordinates) => {
+    polylines.updatePolyline(a);
+  },
+  onCanceledPath: (a: AttributedCoordinates) => {
+    polylines.cancelPolyline(a);
+  },
+  onCreatedPath: (a: AttributedCoordinates) => {
+    polylines.createPolyline(a);
+  },
+});
+
+const pathTracker = new PathTracker(<PathTrackerEventHandler>{
+  onNewPath: (a: AttributedCoordinates) => {
+    pathProcessor.startPath(a);
+  },
+  onFinishedPath: (a: AttributedCoordinates) => {
+    pathProcessor.finishPath(a);
+  },
+  onUpdatedPath: (a: AttributedCoordinates) => {
+    pathProcessor.updatePath(a);
+  },
+  onCanceledPath: (a: AttributedCoordinates) => {
+    pathProcessor.cancelPath(a);
+  },
+  onCreatedPath: (a: AttributedCoordinates) => {
+    pathProcessor.createPath(a);
   },
 });
 

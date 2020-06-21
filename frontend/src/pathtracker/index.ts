@@ -4,7 +4,6 @@ import {
   AttributedCoordinates,
   Attribution,
 } from "../coordinates";
-import { PathProcessor } from "../pathprocessor";
 import { Path, PathConstructor } from "./path";
 
 export interface PathTrackerEventHandler {
@@ -15,27 +14,26 @@ export interface PathTrackerEventHandler {
   onCreatedPath: (path: AttributedCoordinates) => void;
 }
 
-interface PathTrackerConstructor {
-  eventHandler: PathTrackerEventHandler;
-  pathProcessor: PathProcessor;
+interface PathTrackerInterface {
+  startPath: (a: AttributedCoordinate) => void;
+  updatePath: (a: AttributedCoordinate) => void;
+  finishPath: (a: AttributedCoordinate) => void;
+  cancelPath: (a: AttributedCoordinate) => void;
+  createPath: (a: AttributedCoordinates) => void;
 }
 
-export default class PathTracker {
+export default class PathTracker implements PathTrackerInterface {
   eventHandler: PathTrackerEventHandler;
   paths: Record<Attribution, Path> = {};
-  pathProcessor: PathProcessor;
 
-  constructor({ eventHandler, pathProcessor }: PathTrackerConstructor) {
+  constructor(eventHandler: PathTrackerEventHandler) {
     this.eventHandler = eventHandler;
-    this.pathProcessor = pathProcessor;
   }
 
   startPath({ id, data }: AttributedCoordinate) {
     const constructor: PathConstructor = {
       id,
-      raw: [data],
       data: [data],
-      processor: this.pathProcessor,
     };
 
     const path = new Path(constructor);
@@ -59,9 +57,7 @@ export default class PathTracker {
   createPath({ id, data }: AttributedCoordinates) {
     const constructor: PathConstructor = {
       id,
-      raw: data,
       data: data,
-      processor: this.pathProcessor,
     };
 
     const path = new Path(constructor);
