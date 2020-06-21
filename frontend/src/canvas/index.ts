@@ -1,9 +1,5 @@
 import { SVGCoordinateTransformer, AttributedCoordinate } from "../coordinates";
-
-import {
-  PointerEventHandler,
-  attachPointerEventHandler,
-} from "../pointerevents";
+import { CoordinateTransformer, Coordinate } from "../coordinates";
 import { createSvgElement, ViewBox, setSvgViewBox, zoomViewBox } from "./svg";
 
 interface CanvasInterface {
@@ -15,9 +11,16 @@ interface CanvasInterface {
   removeCursor: (element: SVGElement) => void;
 }
 
+export interface CanvasEventHandler {
+  onPointerDown: (a: AttributedCoordinate) => void;
+  onPointerUp: (a: AttributedCoordinate) => void;
+  onPointerMove: (a: AttributedCoordinate) => void;
+  onPointerCancel: (a: AttributedCoordinate) => void;
+}
+
 interface CanvasConstructor {
   target: HTMLElement;
-  pointerEventHandler: PointerEventHandler;
+  eventHandler: CanvasEventHandler;
 }
 
 export default class Canvas implements CanvasInterface {
@@ -31,7 +34,7 @@ export default class Canvas implements CanvasInterface {
   domParser = new DOMParser();
   xmlSerializer = new XMLSerializer();
 
-  constructor({ target, pointerEventHandler }: CanvasConstructor) {
+  constructor({ target, eventHandler }: CanvasConstructor) {
     this.workingCanvas = createSvgElement(this.viewBox);
     this.finishedCanvas = createSvgElement(this.viewBox);
     this.cursorCanvas = createSvgElement(this.viewBox);
@@ -40,11 +43,9 @@ export default class Canvas implements CanvasInterface {
     target.appendChild(this.finishedCanvas);
     target.appendChild(this.cursorCanvas);
 
-    this.target = target;
-
-    attachPointerEventHandler(
+    attachEventHandler(
       target,
-      pointerEventHandler,
+      eventHandler,
       SVGCoordinateTransformer(this.workingCanvas)
     );
   }
@@ -91,4 +92,77 @@ export default class Canvas implements CanvasInterface {
   get zoom(): number {
     return this.zoomFactor;
   }
+}
+
+function attachEventHandler(
+  target: HTMLElement,
+  eventHandler: CanvasEventHandler,
+  transformCoordinates: CoordinateTransformer
+) {
+  target.addEventListener(
+    "pointerdown",
+    (evt: PointerEvent) => {
+      stopPrevent(evt);
+      const id = pointerIdToId(evt.pointerId);
+      const data = transformCoordinates(eventCoordinates(evt));
+      eventHandler.onPointerDown({ id, data });
+    },
+    false
+  );
+
+  target.addEventListener(
+    "pointerup",
+    (evt: PointerEvent) => {
+      stopPrevent(evt);
+      const id = pointerIdToId(evt.pointerId);
+      const data = transformCoordinates(eventCoordinates(evt));
+      eventHandler.onPointerUp({ id, data });
+    },
+    false
+  );
+
+  document.addEventListener(
+    "pointerup",
+    (evt: PointerEvent) => {
+      stopPrevent(evt);
+      const id = pointerIdToId(evt.pointerId);
+      const data = transformCoordinates(eventCoordinates(evt));
+      eventHandler.onPointerUp({ id, data });
+    },
+    false
+  );
+
+  target.addEventListener(
+    "pointercancel",
+    (evt: PointerEvent) => {
+      stopPrevent(evt);
+      const id = pointerIdToId(evt.pointerId);
+      eventHandler.onPointerCancel({ id });
+    },
+    false
+  );
+
+  target.addEventListener(
+    "pointermove",
+    (evt: PointerEvent) => {
+      stopPrevent(evt);
+      const id = pointerIdToId(evt.pointerId);
+      const data = transformCoordinates(eventCoordinates(evt));
+      eventHandler.onPointerMove({ id, data });
+    },
+    false
+  );
+}
+
+function stopPrevent(evt: PointerEvent) {
+  evt.stopPropagation();
+  evt.preventDefault();
+}
+
+function eventCoordinates(evt: PointerEvent): Coordinate {
+  return [evt.clientX, evt.clientY];
+}
+
+function pointerIdToId(pointerId: number) {
+  return `${pointerId}`;
 }

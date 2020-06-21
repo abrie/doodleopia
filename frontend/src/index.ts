@@ -1,9 +1,8 @@
 import { AttributedCoordinate, AttributedCoordinates } from "./coordinates";
-import Canvas from "./canvas";
+import Canvas, { CanvasEventHandler } from "./canvas";
 import CursorTracker, { CursorTrackerEventHandler } from "./cursorTracker";
 import PenTracker, { PenTrackerEventHandler } from "./penTracker";
 import Polylines, { PolylineEventHandler } from "./polylines";
-import { PointerEventHandler } from "./pointerevents";
 import PathTracker, { PathTrackerEventHandler } from "./pathtracker";
 import Messages, { MessagesEventHandler, Message } from "./messages";
 import Store, { StoreEventHandler } from "./store";
@@ -68,7 +67,7 @@ const pathTracker = new PathTracker({
 
 const canvas = new Canvas({
   target: document.getElementById("canvas"),
-  pointerEventHandler: <PointerEventHandler>{
+  eventHandler: <CanvasEventHandler>{
     onPointerDown: (a: AttributedCoordinate) => penTracker.down(a),
     onPointerUp: (a: AttributedCoordinate) => penTracker.up(a),
     onPointerMove: (a: AttributedCoordinate) => penTracker.move(a),
