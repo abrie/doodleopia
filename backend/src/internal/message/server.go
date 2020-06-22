@@ -1,25 +1,55 @@
 package message
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"net/http"
+	"os"
+	"time"
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/cors"
 )
 
-func (store *Store) Serve(port int) {
+func (store *Store) Serve(port int, done chan struct{}) {
 	r := chi.NewRouter()
 
-	hub := newHub()
+	statsOutput, err := os.OpenFile("sizes.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, os.ModePerm)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	statsCollector := NewStatsCollector(statsOutput)
+	statsCollector.Start()
+	hub := newHub(statsCollector)
 	go hub.run()
 
 	r.Get("/", GetHandler(hub))
 
 	addr := fmt.Sprintf(":%d", port)
-	log.Printf("—MESSAGESERVICE— now running. Serving HTTP on %s\n", addr)
-	log.Fatal(http.ListenAndServe(addr, r))
+	server := &http.Server{Addr: addr, Handler: r}
+
+	go func() {
+		log.Printf("—MESSAGESERVICE— serving HTTP on %s\n", addr)
+		if err := server.ListenAndServe(); err != http.ErrServerClosed {
+			log.Printf("—MESSAGESERVICE— unexpected error: %v", err)
+		}
+	}()
+
+	<-done
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+
+	defer cancel()
+
+	if err := server.Shutdown(ctx); err != nil {
+		log.Printf("—MESSAGESERVICE— shutdown failed: %v\n", err)
+	}
+
+	statsCollector.Stop()
+	<-statsCollector.Finished
+
 }
 
 func newCorsHandler() func(http.Handler) http.Handler {

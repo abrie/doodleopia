@@ -1,27 +1,44 @@
 package vector
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
 	"github.com/go-chi/cors"
 )
 
-func (store *Store) Serve(port int) {
-	r := chi.NewRouter()
+func (store *Store) Serve(port int, done chan struct{}) {
+	handler := chi.NewRouter()
 
-	r.Use(newCorsHandler())
-	r.Use(middleware.NoCache)
+	handler.Use(newCorsHandler())
+	handler.Use(middleware.NoCache)
 
-	r.Get("/*", GetHandler(store))
-	r.Post("/", PostHandler(store))
+	handler.Get("/*", GetHandler(store))
+	handler.Post("/", PostHandler(store))
 
 	addr := fmt.Sprintf(":%d", port)
-	log.Printf("—VECTORSERVICE— now running. Serving HTTP on %s\n", addr)
-	log.Fatal(http.ListenAndServe(addr, r))
+	server := &http.Server{Addr: addr, Handler: handler}
+	go func() {
+		log.Printf("—VECTORSERVICE— serving HTTP on %s\n", addr)
+		if err := server.ListenAndServe(); err != http.ErrServerClosed {
+			log.Printf("—VECTORSERVICE— unexpected error: %v", err)
+		}
+	}()
+
+	<-done
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+
+	defer cancel()
+
+	if err := server.Shutdown(ctx); err != nil {
+		log.Printf("—VECTORSERVICE— shutdown error: %v", err)
+	}
 }
 
 func newCorsHandler() func(http.Handler) http.Handler {
