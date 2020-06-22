@@ -34,17 +34,26 @@ export default class implements MessagesInterface {
   }
 
   open() {
+    console.log("Opening connection...");
     this.conn = new WebSocket(this.url);
     this.conn.onopen = (evt) => {
       window.clearTimeout(this.timerId);
       this.eventHandler.onOpen();
     };
-    this.conn.onerror = (evt) => this.eventHandler.onError();
+    this.conn.onerror = (evt) => {
+      this.conn = undefined;
+      this.eventHandler.onError();
+    };
     this.conn.onclose = (evt) => {
+      this.conn = undefined;
       this.timerId = window.setTimeout(() => this.open(), 250);
       this.eventHandler.onClose();
     };
     this.conn.onmessage = (evt) => this.receive(evt.data);
+  }
+
+  get isOpen() {
+    return this.conn && this.conn.readyState === 1; // OPEN
   }
 
   receive(data) {
@@ -57,7 +66,7 @@ export default class implements MessagesInterface {
   }
 
   send(data) {
-    if (this.conn) {
+    if (this.isOpen) {
       const message = { ...data, clientId: this.clientId };
       this.conn.send(Message.serialize(message));
     }

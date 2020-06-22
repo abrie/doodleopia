@@ -86,19 +86,24 @@ const pathTracker = new PathTracker(<PathTrackerEventHandler>{
 const pathProcessor = new PathProcessor(<PathProcessorEventHandler>{
   onNewPath: (a: AttributedCoordinates) => {
     polylines.startPolyline(a);
+    messages.send({ action: "start-polyline", ...a });
   },
   onFinishedPath: (a: AttributedCoordinates) => {
     polylines.finishPolyline(a);
     store.pushAttributedCoordinates(a);
+    messages.send({ action: "finish-polyline", ...a });
   },
   onUpdatedPath: (a: AttributedCoordinates) => {
     polylines.updatePolyline(a);
+    messages.send({ action: "update-polyline", ...a });
   },
   onCanceledPath: (a: AttributedCoordinates) => {
     polylines.cancelPolyline(a);
+    messages.send({ action: "cancel-polyline", ...a });
   },
   onCreatedPath: (a: AttributedCoordinates) => {
     polylines.createPolyline(a);
+    messages.send({ action: "create-polyline", ...a });
   },
 });
 
@@ -135,25 +140,34 @@ const lsystem = new LSystem(<TurtleEventHandler>{
   onTurtleUp: (a: AttributedCoordinate) => pointerTracker.up(a),
 });
 
-function processMessage({ clientId, action, id, data }: Message) {
-  const attributedCoordinate: AttributedCoordinate = {
+function messageToAttributedCoordinates({
+  clientId,
+  id,
+  data,
+}): AttributedCoordinates {
+  return <AttributedCoordinates>{
     id: `${clientId}.${id}`,
     data: data,
   };
+}
+
+function processMessage(message: Message) {
+  const { action } = message;
   switch (action) {
-    case "down":
-      pathTracker.startPath(attributedCoordinate);
+    case "start-polyline":
+      polylines.startPolyline(messageToAttributedCoordinates(message));
       break;
-    case "up":
-      pathTracker.finishPath(attributedCoordinate);
+    case "finish-polyline":
+      polylines.finishPolyline(messageToAttributedCoordinates(message));
       break;
-    case "move":
-      pathTracker.updatePath(attributedCoordinate);
+    case "update-polyline":
+      polylines.updatePolyline(messageToAttributedCoordinates(message));
       break;
-    case "cancel":
-      pathTracker.cancelPath(attributedCoordinate);
+    case "cancel-polyline":
+      polylines.cancelPolyline(messageToAttributedCoordinates(message));
       break;
     case "cursor":
+      const { clientId, data } = message;
       cursorTracker.updateCursor(clientId, data);
       break;
     default:
