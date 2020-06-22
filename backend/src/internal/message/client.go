@@ -14,6 +14,11 @@ type Client struct {
 	send chan []byte
 }
 
+type InboundMessage struct {
+	Source  *Client
+	Payload *[]byte
+}
+
 const (
 	// Time allowed to write a message to the peer.
 	writeWait = 10 * time.Second
@@ -60,7 +65,7 @@ func (c *Client) readPump() {
 
 		message = bytes.TrimSpace(bytes.Replace(message, newline, space, -1))
 
-		c.hub.inbound <- message
+		c.hub.inbound <- &InboundMessage{Source: c, Payload: &message}
 	}
 }
 

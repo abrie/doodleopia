@@ -4,7 +4,7 @@ type Hub struct {
 	// Registered clients.
 	clients map[*Client]bool
 
-	inbound chan []byte
+	inbound chan *InboundMessage
 
 	// Register requests from the clients.
 	register chan *Client
@@ -18,7 +18,7 @@ type Hub struct {
 
 func newHub(statsCollector *StatsCollector) *Hub {
 	return &Hub{
-		inbound:        make(chan []byte),
+		inbound:        make(chan *InboundMessage),
 		register:       make(chan *Client),
 		unregister:     make(chan *Client),
 		clients:        make(map[*Client]bool),
@@ -37,9 +37,11 @@ func (h *Hub) run() {
 			h.unregisterClient(client)
 
 		case message := <-h.inbound:
-			h.statsCollector.Sink <- int64(len(message))
+			h.statsCollector.Sink <- int64(len(*message.Payload))
 			for client := range h.clients {
-				h.sendMessage(client, message)
+				if client != message.Source {
+					h.sendMessage(client, *message.Payload)
+				}
 			}
 		}
 	}

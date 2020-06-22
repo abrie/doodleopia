@@ -58,10 +58,9 @@ export default class implements MessagesInterface {
 
   receive(data) {
     if (this.eventHandler.onMessage) {
-      const messages = Message.deserialize(data);
-      messages
-        .filter((message) => message.clientId != this.clientId)
-        .forEach((message) => this.eventHandler.onMessage(message));
+      Message.deserialize(data).forEach((message) =>
+        this.eventHandler.onMessage(message)
+      );
     }
   }
 
