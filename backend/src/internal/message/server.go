@@ -13,7 +13,7 @@ import (
 	"github.com/go-chi/cors"
 )
 
-func (store *Store) Serve(port int, done chan struct{}) {
+func (store *Store) Serve(port int) {
 	r := chi.NewRouter()
 
 	storePath, err := store.CreateStore()
@@ -44,7 +44,7 @@ func (store *Store) Serve(port int, done chan struct{}) {
 		}
 	}()
 
-	<-done
+	<-store.Stop
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 

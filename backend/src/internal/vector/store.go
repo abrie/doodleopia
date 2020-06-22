@@ -16,6 +16,7 @@ type Interface interface {
 
 type Store struct {
 	Directory string
+	Stop      chan struct{}
 }
 
 func (s *Store) CreateStore(parts ...string) (string, error) {

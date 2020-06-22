@@ -12,43 +12,51 @@ import (
 	"sync"
 )
 
-var wg sync.WaitGroup
-var done chan struct{}
-
 func main() {
-	done = make(chan struct{})
-
 	directory := flag.String("d", ".", "base data directory")
 	flag.Parse()
 
-	wg.Add(2)
+	var wg sync.WaitGroup
+	stop := make(chan struct{})
 
-	go serveVector(path.Join(*directory, "vector"), 9200)
-	go serveMessage(path.Join(*directory, "message"), 9300)
+	processes := []func(){
+		func() {
+			defer wg.Done()
 
-	stop := make(chan os.Signal, 1)
-	signal.Notify(stop, os.Interrupt)
+			store := vector.Store{
+				Directory: path.Join(*directory, "vector"),
+				Stop:      stop}
 
-	<-stop
-	log.Println("Terminating system...")
+			store.Serve(9200)
+		},
 
-	close(done)
+		func() {
+			defer wg.Done()
+
+			store := message.Store{
+				Directory: path.Join(*directory, "message"),
+				Stop:      stop}
+
+			store.Serve(9300)
+		},
+	}
+
+	wg.Add(len(processes))
+
+	for _, process := range processes {
+		go process()
+	}
+
+	interrupt := make(chan os.Signal, 1)
+	signal.Notify(interrupt, os.Interrupt)
+
+	<-interrupt
+
+	log.Println("Stopping system...")
+
+	close(stop)
 
 	wg.Wait()
 
-	log.Println("Terminated.")
-}
-
-func serveVector(directory string, port int) {
-	defer wg.Done()
-
-	store := vector.Store{Directory: directory}
-	store.Serve(port, done)
-}
-
-func serveMessage(directory string, port int) {
-	defer wg.Done()
-
-	store := message.Store{Directory: directory}
-	store.Serve(port, done)
+	log.Println("Stopped.")
 }
