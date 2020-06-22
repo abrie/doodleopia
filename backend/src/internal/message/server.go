@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"path"
 	"time"
 
 	"github.com/go-chi/chi"
@@ -15,7 +16,13 @@ import (
 func (store *Store) Serve(port int, done chan struct{}) {
 	r := chi.NewRouter()
 
-	statsOutput, err := os.OpenFile("sizes.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, os.ModePerm)
+	storePath, err := store.CreateStore()
+	if err != nil {
+		log.Fatal("Failed to create message store: %v", err)
+	}
+
+	statsPath := path.Join(storePath, "sizes.log")
+	statsOutput, err := os.OpenFile(statsPath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, os.ModePerm)
 	if err != nil {
 		log.Fatal(err)
 	}

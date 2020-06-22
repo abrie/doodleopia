@@ -24,7 +24,7 @@ func main() {
 	wg.Add(2)
 
 	go serveVector(path.Join(*directory, "vector"), 9200)
-	go serveMessage(9300)
+	go serveMessage(path.Join(*directory, "message"), 9300)
 
 	stop := make(chan os.Signal, 1)
 	signal.Notify(stop, os.Interrupt)
@@ -46,9 +46,9 @@ func serveVector(directory string, port int) {
 	store.Serve(port, done)
 }
 
-func serveMessage(port int) {
+func serveMessage(directory string, port int) {
 	defer wg.Done()
 
-	store := message.Store{}
+	store := message.Store{Directory: directory}
 	store.Serve(port, done)
 }
