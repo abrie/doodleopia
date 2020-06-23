@@ -8,19 +8,19 @@ import (
 	"log"
 )
 
-type StatsRecord struct {
+type Record struct {
 	MessageSize int64
 }
 
-type StatsCollector struct {
+type Collector struct {
 	Sink     chan int64
 	output   io.WriteCloser
 	done     chan struct{}
 	Finished chan struct{}
 }
 
-func NewStatsCollector(output io.WriteCloser) *StatsCollector {
-	return &StatsCollector{
+func NewCollector(output io.WriteCloser) *Collector {
+	return &Collector{
 		Sink:     make(chan int64),
 		Finished: make(chan struct{}),
 		done:     make(chan struct{}),
@@ -28,14 +28,14 @@ func NewStatsCollector(output io.WriteCloser) *StatsCollector {
 	}
 }
 
-func (s *StatsCollector) Start() {
+func (s *Collector) Start() {
 	go func() {
 		for {
 			select {
 			case messageSize := <-s.Sink:
-				statsRecord := StatsRecord{MessageSize: messageSize}
+				record := Record{MessageSize: messageSize}
 				buffer := new(bytes.Buffer)
-				if err := binary.Write(buffer, binary.LittleEndian, statsRecord); err != nil {
+				if err := binary.Write(buffer, binary.LittleEndian, record); err != nil {
 					log.Printf("Failed: %v", err)
 				}
 				s.output.Write(buffer.Bytes())
@@ -48,6 +48,6 @@ func (s *StatsCollector) Start() {
 	}()
 }
 
-func (s *StatsCollector) Stop() {
+func (s *Collector) Stop() {
 	close(s.done)
 }

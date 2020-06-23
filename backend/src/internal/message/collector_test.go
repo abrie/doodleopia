@@ -9,17 +9,17 @@ import (
 
 type TestWriterCloser struct {
 	t   *testing.T
-	got chan StatsRecord
+	got chan Record
 }
 
 func (twc TestWriterCloser) Write(p []byte) (int, error) {
-	var statsRecord StatsRecord
+	var record Record
 	buf := bytes.NewReader(p)
-	if err := binary.Read(buf, binary.LittleEndian, &statsRecord); err != nil {
+	if err := binary.Read(buf, binary.LittleEndian, &record); err != nil {
 		twc.t.Fatal(err)
 	}
 
-	twc.got <- statsRecord
+	twc.got <- record
 
 	return len(p), nil
 }
@@ -29,23 +29,23 @@ func (twc TestWriterCloser) Close() error {
 }
 
 func TestStatsOutput(t *testing.T) {
-	wants := []StatsRecord{
-		StatsRecord{MessageSize: 100},
-		StatsRecord{MessageSize: 200},
-		StatsRecord{MessageSize: 150},
+	wants := []Record{
+		Record{MessageSize: 100},
+		Record{MessageSize: 200},
+		Record{MessageSize: 150},
 	}
 
-	twc := TestWriterCloser{t, make(chan StatsRecord, len(wants))}
+	twc := TestWriterCloser{t, make(chan Record, len(wants))}
 
-	statsCollector := NewStatsCollector(twc)
-	statsCollector.Start()
+	collector := NewCollector(twc)
+	collector.Start()
 
 	for _, val := range wants {
-		statsCollector.Sink <- val.MessageSize
+		collector.Sink <- val.MessageSize
 	}
 
-	statsCollector.Stop()
-	<-statsCollector.Finished
+	collector.Stop()
+	<-collector.Finished
 
 	if len(wants) != len(twc.got) {
 		t.Fatalf("Wanted length %d, got length %d.", len(wants), len(twc.got))
@@ -54,7 +54,7 @@ func TestStatsOutput(t *testing.T) {
 	for _, want := range wants {
 		got := <-twc.got
 		if cmp.Equal(want, got) != true {
-			t.Fatalf("StatsRecord does not match expected: %s\n", cmp.Diff(want, got))
+			t.Fatalf("Record does not match expected: %s\n", cmp.Diff(want, got))
 		}
 	}
 }

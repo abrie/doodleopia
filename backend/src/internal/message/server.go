@@ -18,7 +18,7 @@ func (store *Store) Serve(port int) {
 
 	storePath, err := store.CreateStore()
 	if err != nil {
-		log.Fatal("Failed to create message store: %v", err)
+		log.Fatalf("Failed to create message store: %v", err)
 	}
 
 	statsPath := path.Join(storePath, "sizes.log")
@@ -27,9 +27,9 @@ func (store *Store) Serve(port int) {
 		log.Fatal(err)
 	}
 
-	statsCollector := NewStatsCollector(statsOutput)
-	statsCollector.Start()
-	hub := newHub(statsCollector)
+	collector := NewCollector(statsOutput)
+	collector.Start()
+	hub := newHub(collector)
 	go hub.run()
 
 	r.Get("/", GetHandler(hub))
@@ -54,8 +54,8 @@ func (store *Store) Serve(port int) {
 		log.Printf("—MESSAGESERVICE— shutdown failed: %v\n", err)
 	}
 
-	statsCollector.Stop()
-	<-statsCollector.Finished
+	collector.Stop()
+	<-collector.Finished
 
 }
 

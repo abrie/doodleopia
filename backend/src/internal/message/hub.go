@@ -10,19 +10,19 @@ type Hub struct {
 	register chan *Client
 
 	// Message size stats
-	statsCollector *StatsCollector
+	collector *Collector
 
 	// Unregister requests from clients.
 	unregister chan *Client
 }
 
-func newHub(statsCollector *StatsCollector) *Hub {
+func newHub(collector *Collector) *Hub {
 	return &Hub{
-		inbound:        make(chan *InboundMessage),
-		register:       make(chan *Client),
-		unregister:     make(chan *Client),
-		clients:        make(map[*Client]bool),
-		statsCollector: statsCollector,
+		inbound:    make(chan *InboundMessage),
+		register:   make(chan *Client),
+		unregister: make(chan *Client),
+		clients:    make(map[*Client]bool),
+		collector:  collector,
 	}
 }
 
@@ -37,7 +37,7 @@ func (h *Hub) run() {
 			h.unregisterClient(client)
 
 		case message := <-h.inbound:
-			h.statsCollector.Sink <- int64(len(*message.Payload))
+			h.collector.Sink <- int64(len(*message.Payload))
 			for client := range h.clients {
 				if client != message.Source {
 					h.sendMessage(client, *message.Payload)
