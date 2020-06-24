@@ -3,9 +3,10 @@ package collector
 import (
 	"bytes"
 	"encoding/binary"
-	"encoding/json"
 	"io"
 	"log"
+
+	message "backend/internal/message"
 )
 
 type Record struct {
@@ -71,12 +72,8 @@ func (s *Collector) Start() {
 		for {
 			select {
 			case payload := <-s.Sink:
-				var message Message
-				if err := json.Unmarshal(*payload, &message); err != nil {
-					log.Printf("Collector could not unmarshal message action: %v", err)
-					break
-				}
-				if message.Action == "cursor" {
+				msg := message.GetRootAsMessage(*payload, 0)
+				if msg.Action() == message.ActionCursor {
 					break
 				}
 				size := int64(len(*payload))

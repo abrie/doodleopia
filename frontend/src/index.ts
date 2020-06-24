@@ -4,7 +4,11 @@ import CursorTracker, { CursorTrackerEventHandler } from "./cursortracker";
 import PointerTracker, { PointerTrackerEventHandler } from "./pointertracker";
 import Polylines, { PolylineEventHandler } from "./polylines";
 import PathTracker, { PathTrackerEventHandler } from "./pathtracker";
-import Messages, { MessagesEventHandler, Message } from "./messages";
+import Messages, {
+  MessagesEventHandler,
+  Message,
+  FlatbufferMessage,
+} from "./messages";
 import Store, { StoreEventHandler } from "./store";
 import PathProcessor, { PathProcessorEventHandler } from "./pathprocessor";
 import { TurtleEventHandler } from "./turtle";
@@ -30,38 +34,38 @@ const pointerTracker = new PointerTracker(<PointerTrackerEventHandler>{
   onPointerDown: (a: AttributedCoordinate) => {
     pathTracker.startPath(a);
     messages.send({
-      action: "down",
+      action: FlatbufferMessage.Action.Down,
       ...a,
     });
   },
   onPointerUp: (a: AttributedCoordinate) => {
     pathTracker.finishPath(a);
     messages.send({
-      action: "up",
+      action: FlatbufferMessage.Action.Up,
       ...a,
     });
   },
   onPointerMove: (a: AttributedCoordinate) => {
     pathTracker.updatePath(a);
     messages.send({
-      action: "move",
+      action: FlatbufferMessage.Action.Move,
       ...a,
     });
     messages.send({
-      action: "cursor",
+      action: FlatbufferMessage.Action.Cursor,
       ...a,
     });
   },
   onPointerHover: (a: AttributedCoordinate) => {
     cursorTracker.local = a.data;
     messages.send({
-      action: "cursor",
+      action: FlatbufferMessage.Action.Cursor,
       ...a,
     });
   },
   onPointerCancel: (a: AttributedCoordinate) => {
     pathTracker.cancelPath(a);
-    messages.send({ action: "cancel", ...a });
+    messages.send({ action: FlatbufferMessage.Action.Cancel, ...a });
   },
 });
 
@@ -165,34 +169,20 @@ function messageToAttributedCoordinate({
 function processMessage(message: Message) {
   const { action } = message;
   switch (action) {
-    /*
-    case "start-polyline":
-      polylines.startPolyline(messageToAttributedCoordinates(message));
-      break;
-    case "finish-polyline":
-      polylines.finishPolyline(messageToAttributedCoordinates(message));
-      break;
-    case "update-polyline":
-      polylines.updatePolyline(messageToAttributedCoordinates(message));
-      break;
-    case "cancel-polyline":
-      polylines.cancelPolyline(messageToAttributedCoordinates(message));
-      break;
-      */
-    case "clear":
+    case FlatbufferMessage.Action.Clear:
       canvas.clear();
       store.clearPathRecord();
       break;
-    case "down":
+    case FlatbufferMessage.Action.Down:
       pathTracker.startPath(messageToAttributedCoordinate(message));
       break;
-    case "up":
+    case FlatbufferMessage.Action.Up:
       pathTracker.finishPath(messageToAttributedCoordinate(message));
       break;
-    case "move":
+    case FlatbufferMessage.Action.Move:
       pathTracker.updatePath(messageToAttributedCoordinate(message));
       break;
-    case "cursor":
+    case FlatbufferMessage.Action.Cursor:
       const { clientId, data } = message;
       cursorTracker.updateCursor(clientId, data);
       break;
@@ -218,7 +208,7 @@ function attachUIEventHandlers() {
     canvas.clear();
     store.clearPathRecord();
     messages.send({
-      action: "clear",
+      action: FlatbufferMessage.Action.Clear,
     });
   });
 

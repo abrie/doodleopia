@@ -10,7 +10,8 @@ export enum Action{
   Down= 1,
   Move= 2,
   Clear= 3,
-  Cursor= 4
+  Cursor= 4,
+  Cancel= 5
 }};
 
 /**

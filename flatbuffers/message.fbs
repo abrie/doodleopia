@@ -1,6 +1,6 @@
 namespace message;
 
-enum Action:byte {Up,Down,Move,Clear,Cursor}
+enum Action:byte {Up,Down,Move,Clear,Cursor,Cancel}
 
 struct Coordinate {
   x:float;

@@ -12,6 +12,7 @@ const (
 	ActionMove   Action = 2
 	ActionClear  Action = 3
 	ActionCursor Action = 4
+	ActionCancel Action = 5
 )
 
 var EnumNamesAction = map[Action]string{
@@ -20,6 +21,7 @@ var EnumNamesAction = map[Action]string{
 	ActionMove:   "Move",
 	ActionClear:  "Clear",
 	ActionCursor: "Cursor",
+	ActionCancel: "Cancel",
 }
 
 var EnumValuesAction = map[string]Action{
@@ -28,6 +30,7 @@ var EnumValuesAction = map[string]Action{
 	"Move":   ActionMove,
 	"Clear":  ActionClear,
 	"Cursor": ActionCursor,
+	"Cancel": ActionCancel,
 }
 
 func (v Action) String() string {

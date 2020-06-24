@@ -4,14 +4,16 @@ import type {
   AttributedCoordinate,
 } from "../coordinates";
 
+import { message as FlatbufferMessage } from "./message_generated";
+
 export interface MessageInterface extends AttributedCoordinate {
   clientId: string;
-  action: string;
+  action: FlatbufferMessage.Action;
 }
 
 export class Message implements MessageInterface {
   clientId: string;
-  action: string;
+  action: FlatbufferMessage.Action;
   id: Attribution;
   data: Coordinate;
 

@@ -1,7 +1,6 @@
 package messaging
 
 import (
-	"bytes"
 	"log"
 	"time"
 
@@ -64,8 +63,6 @@ func (c *Client) readPump() {
 			break
 		}
 
-		message = bytes.TrimSpace(bytes.Replace(message, newline, space, -1))
-
 		c.hub.inbound <- &InboundMessage{Source: c, Payload: &message}
 	}
 }
@@ -81,32 +78,13 @@ func (c *Client) writePump() {
 	for {
 		select {
 		case messages, ok := <-c.playback:
-			if len(messages) == 0 {
-				break
-			}
-			c.conn.SetWriteDeadline(time.Now().Add(writeWait))
 			if !ok {
 				// The hub closed the channel.
 				c.conn.WriteMessage(websocket.CloseMessage, []byte{})
 				return
 			}
-			w, err := c.conn.NextWriter(websocket.TextMessage)
-			if err != nil {
-				log.Printf("client writePump failed to get a Writer: %v", err)
-				return
-			}
-
-			w.Write(messages[0])
-			for i := 1; i < len(messages); i++ {
-				w.Write(newline)
-				w.Write(messages[i])
-			}
-
-			if err := w.Close(); err != nil {
-				log.Printf("client writePump failed to close Writer: %v", err)
-				return
-			}
-
+			log.Printf("%d\n", len(messages))
+			break
 		case message, ok := <-c.send:
 			c.conn.SetWriteDeadline(time.Now().Add(writeWait))
 			if !ok {
@@ -115,19 +93,22 @@ func (c *Client) writePump() {
 				return
 			}
 
-			w, err := c.conn.NextWriter(websocket.TextMessage)
+			w, err := c.conn.NextWriter(websocket.BinaryMessage)
 			if err != nil {
 				log.Printf("client writePump failed to get a Writer: %v", err)
 				return
 			}
+
 			w.Write(message)
 
-			// Add queued chat messages to the current websocket message.
-			n := len(c.send)
-			for i := 0; i < n; i++ {
-				w.Write(newline)
-				w.Write(<-c.send)
-			}
+			/*
+				// Add queued chat messages to the current websocket message.
+				n := len(c.send)
+				for i := 0; i < n; i++ {
+					w.Write(newline)
+					w.Write(<-c.send)
+				}
+			*/
 
 			if err := w.Close(); err != nil {
 				log.Printf("client writePump failed to close Writer: %v", err)

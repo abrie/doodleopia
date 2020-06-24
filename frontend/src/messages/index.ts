@@ -5,7 +5,7 @@ import { Message } from "./message";
 import { message as FlatbufferMessage } from "./message_generated";
 import { flatbuffers } from "flatbuffers";
 
-export { Message };
+export { Message, FlatbufferMessage };
 
 export type MessagesEventHandler = {
   onOpen: () => void;
@@ -25,12 +25,11 @@ export default class implements MessagesInterface {
   clientId: string = uuidv4();
   eventHandler: MessagesEventHandler;
   conn: WebSocket;
+  sent: ArrayBuffer;
   timerId: number | undefined;
 
   constructor(eventHandler: MessagesEventHandler) {
     this.eventHandler = eventHandler;
-
-    this.runTests();
   }
 
   get url() {
@@ -41,10 +40,11 @@ export default class implements MessagesInterface {
   open() {
     window.clearTimeout(this.timerId);
     this.conn = new WebSocket(this.url);
-    //this.conn.bufferType = "arraybuffer";
+    this.conn.binaryType = "arraybuffer";
 
     this.conn.onopen = (evt) => {
       this.eventHandler.onOpen();
+      this.runTests();
     };
 
     this.conn.onerror = (evt) => {
@@ -67,55 +67,13 @@ export default class implements MessagesInterface {
     return this.conn && this.conn.readyState === 1; // OPEN
   }
 
-  receive(data) {
-    if (this.eventHandler.onMessage) {
-      Message.deserialize(data).forEach((message) =>
-        this.eventHandler.onMessage(message)
-      );
-    }
-  }
-
-  stringToAction(str) {
-    switch (str) {
-      case "up":
-        return FlatbufferMessage.Action.Up;
-      case "down":
-        return FlatbufferMessage.Action.Down;
-      case "move":
-        return FlatbufferMessage.Action.Move;
-      case "clear":
-        return FlatbufferMessage.Action.Clear;
-      case "cursor":
-        return FlatbufferMessage.Action.Cursor;
-      default:
-        console.error(`Action string does not map to enum: "${str}"`);
-    }
-  }
-
-  runTests() {
-    const payload1 = {
-      action: "cursor",
-      id: 0,
-      data: [112.06227111816406, 528.9884033203125],
-    };
-
-    this.testFlatbuffer(payload1);
-  }
-
-  testFlatbuffer(payload) {
-    const buf = this.buildFlatbuffer(payload);
-    const decoded = this.readFlatbuffer(buf);
-  }
-
-  buildFlatbuffer(payload) {
-    let builder = new flatbuffers.Builder(80);
+  buildFlatbuffer(payload): Uint8Array {
+    let builder = new flatbuffers.Builder(100);
     let clientId = builder.createString(this.clientId);
 
     FlatbufferMessage.Message.startMessage(builder);
     FlatbufferMessage.Message.addClientId(builder, clientId);
-
-    let action = this.stringToAction(payload.action);
-    FlatbufferMessage.Message.addAction(builder, action);
+    FlatbufferMessage.Message.addAction(builder, payload.action);
 
     FlatbufferMessage.Message.addId(builder, payload.id);
 
@@ -132,24 +90,31 @@ export default class implements MessagesInterface {
     return builder.asUint8Array();
   }
 
-  readFlatbuffer(payload) {
+  readFlatbuffer(payload: Uint8Array) {
     let buf = new flatbuffers.ByteBuffer(payload);
     let message = FlatbufferMessage.Message.getRootAsMessage(buf);
     let data = message.data();
-    const result = {
+
+    return {
       clientId: message.clientId(),
       id: message.id(),
       action: message.action(),
-      data: [message.data().x(), message.data().y()],
+      data: data ? [data.x(), data.y()] : undefined,
     };
-
-    console.log(result);
   }
 
-  send(data) {
+  send(payload) {
     if (this.isOpen) {
-      const message = { ...data, clientId: this.clientId };
-      this.conn.send(Message.serialize(message));
+      const buf = this.buildFlatbuffer(payload);
+      this.conn.send(buf);
+    }
+  }
+
+  receive(incoming: ArrayBuffer) {
+    const buf = new Uint8Array(incoming);
+    if (this.eventHandler.onMessage) {
+      const message = this.readFlatbuffer(buf);
+      this.eventHandler.onMessage(message);
     }
   }
 }
