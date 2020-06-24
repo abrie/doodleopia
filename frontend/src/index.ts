@@ -5,7 +5,7 @@ import PointerTracker, { PointerTrackerEventHandler } from "./pointertracker";
 import Polylines, { PolylineEventHandler } from "./polylines";
 import PathTracker, { PathTrackerEventHandler } from "./pathtracker";
 import Messages, { MessagesEventHandler } from "./messages";
-import Message, { FlatbufferMessage } from "./message";
+import Message, { MessageAction } from "./message";
 import Store, { StoreEventHandler } from "./store";
 import PathProcessor, { PathProcessorEventHandler } from "./pathprocessor";
 import { TurtleEventHandler } from "./turtle";
@@ -31,38 +31,38 @@ const pointerTracker = new PointerTracker(<PointerTrackerEventHandler>{
   onPointerDown: (a: AttributedCoordinate) => {
     pathTracker.startPath(a);
     messages.send({
-      action: FlatbufferMessage.Action.Down,
+      action: MessageAction.Down,
       ...a,
     });
   },
   onPointerUp: (a: AttributedCoordinate) => {
     pathTracker.finishPath(a);
     messages.send({
-      action: FlatbufferMessage.Action.Up,
+      action: MessageAction.Up,
       ...a,
     });
   },
   onPointerMove: (a: AttributedCoordinate) => {
     pathTracker.updatePath(a);
     messages.send({
-      action: FlatbufferMessage.Action.Move,
+      action: MessageAction.Move,
       ...a,
     });
     messages.send({
-      action: FlatbufferMessage.Action.Cursor,
+      action: MessageAction.Cursor,
       ...a,
     });
   },
   onPointerHover: (a: AttributedCoordinate) => {
     cursorTracker.local = a.data;
     messages.send({
-      action: FlatbufferMessage.Action.Cursor,
+      action: MessageAction.Cursor,
       ...a,
     });
   },
   onPointerCancel: (a: AttributedCoordinate) => {
     pathTracker.cancelPath(a);
-    messages.send({ action: FlatbufferMessage.Action.Cancel, ...a });
+    messages.send({ action: MessageAction.Cancel, ...a });
   },
 });
 
@@ -166,20 +166,20 @@ function messageToAttributedCoordinate({
 function processMessage(message: Message) {
   const { action } = message;
   switch (action) {
-    case FlatbufferMessage.Action.Clear:
+    case MessageAction.Clear:
       canvas.clear();
       store.clearPathRecord();
       break;
-    case FlatbufferMessage.Action.Down:
+    case MessageAction.Down:
       pathTracker.startPath(messageToAttributedCoordinate(message));
       break;
-    case FlatbufferMessage.Action.Up:
+    case MessageAction.Up:
       pathTracker.finishPath(messageToAttributedCoordinate(message));
       break;
-    case FlatbufferMessage.Action.Move:
+    case MessageAction.Move:
       pathTracker.updatePath(messageToAttributedCoordinate(message));
       break;
-    case FlatbufferMessage.Action.Cursor:
+    case MessageAction.Cursor:
       const { clientId, data } = message;
       cursorTracker.updateCursor(clientId, data);
       break;
@@ -205,7 +205,7 @@ function attachUIEventHandlers() {
     canvas.clear();
     store.clearPathRecord();
     messages.send({
-      action: FlatbufferMessage.Action.Clear,
+      action: MessageAction.Clear,
     });
   });
 

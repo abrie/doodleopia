@@ -8,7 +8,7 @@ import { flatbuffers } from "flatbuffers";
 
 import { message as FlatbufferMessage } from "./message_generated";
 
-export { FlatbufferMessage };
+export const MessageAction = FlatbufferMessage.Action;
 
 export interface MessageInterface extends AttributedCoordinate {
   clientId: string;
@@ -32,7 +32,7 @@ export default class Message implements MessageInterface {
 
 export function buildFlatbuffer(payload): Uint8Array {
   let builder = new flatbuffers.Builder(100);
-  let clientId = builder.createString(this.clientId);
+  let clientId = builder.createString(payload.clientId);
 
   FlatbufferMessage.Message.startMessage(builder);
   FlatbufferMessage.Message.addClientId(builder, clientId);

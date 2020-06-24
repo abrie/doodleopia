@@ -1,8 +1,6 @@
 import { v4 as uuidv4 } from "uuid";
 import type { Coordinate } from "../coordinates";
-import Message, { FlatbufferMessage } from "../message";
-
-import { flatbuffers } from "flatbuffers";
+import Message, { buildFlatbuffer, readFlatbuffer } from "../message";
 
 export type MessagesEventHandler = {
   onOpen: () => void;
@@ -63,45 +61,9 @@ export default class implements MessagesInterface {
     return this.conn && this.conn.readyState === 1; // OPEN
   }
 
-  buildFlatbuffer(payload): Uint8Array {
-    let builder = new flatbuffers.Builder(100);
-    let clientId = builder.createString(this.clientId);
-
-    FlatbufferMessage.Message.startMessage(builder);
-    FlatbufferMessage.Message.addClientId(builder, clientId);
-    FlatbufferMessage.Message.addAction(builder, payload.action);
-
-    FlatbufferMessage.Message.addId(builder, payload.id);
-
-    let data = FlatbufferMessage.Coordinate.createCoordinate(
-      builder,
-      payload.data[0],
-      payload.data[1]
-    );
-    FlatbufferMessage.Message.addData(builder, data);
-
-    let message = FlatbufferMessage.Message.endMessage(builder);
-    FlatbufferMessage.Message.finishMessageBuffer(builder, message);
-
-    return builder.asUint8Array();
-  }
-
-  readFlatbuffer(payload: Uint8Array) {
-    let buf = new flatbuffers.ByteBuffer(payload);
-    let message = FlatbufferMessage.Message.getRootAsMessage(buf);
-    let data = message.data();
-
-    return {
-      clientId: message.clientId(),
-      id: message.id(),
-      action: message.action(),
-      data: data ? [data.x(), data.y()] : undefined,
-    };
-  }
-
   send(payload) {
     if (this.isOpen) {
-      const buf = this.buildFlatbuffer(payload);
+      const buf = buildFlatbuffer({ clientId: this.clientId, ...payload });
       this.conn.send(buf);
     }
   }
@@ -109,7 +71,7 @@ export default class implements MessagesInterface {
   receive(incoming: ArrayBuffer) {
     const buf = new Uint8Array(incoming);
     if (this.eventHandler.onMessage) {
-      const message = this.readFlatbuffer(buf);
+      const message = readFlatbuffer(buf);
       this.eventHandler.onMessage(message);
     }
   }
