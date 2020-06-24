@@ -1,11 +1,8 @@
 import { v4 as uuidv4 } from "uuid";
 import type { Coordinate } from "../coordinates";
-import { Message } from "./message";
+import Message, { FlatbufferMessage } from "../message";
 
-import { message as FlatbufferMessage } from "./message_generated";
 import { flatbuffers } from "flatbuffers";
-
-export { Message, FlatbufferMessage };
 
 export type MessagesEventHandler = {
   onOpen: () => void;
@@ -44,7 +41,6 @@ export default class implements MessagesInterface {
 
     this.conn.onopen = (evt) => {
       this.eventHandler.onOpen();
-      this.runTests();
     };
 
     this.conn.onerror = (evt) => {

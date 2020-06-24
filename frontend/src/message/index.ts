@@ -6,12 +6,14 @@ import type {
 
 import { message as FlatbufferMessage } from "./message_generated";
 
+export { FlatbufferMessage };
+
 export interface MessageInterface extends AttributedCoordinate {
   clientId: string;
   action: FlatbufferMessage.Action;
 }
 
-export class Message implements MessageInterface {
+export default class Message implements MessageInterface {
   clientId: string;
   action: FlatbufferMessage.Action;
   id: Attribution;

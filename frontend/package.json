@@ -2,7 +2,7 @@
   "scripts": {
     "start": "snowpack dev",
     "build": "snowpack build",
-    "generate": "flatc --ts -o src/messages/ ../flatbuffers/message.fbs && sed -i '' s/\\\\.\\\\/flatbuffers/flatbuffers/ src/messages/message_generated.ts",
+    "generate": "flatc --ts -o src/message/ ../flatbuffers/message.fbs && sed -i '' s/\\\\.\\\\/flatbuffers/flatbuffers/ src/message/message_generated.ts",
     "prestart": "yarn run generate",
     "prebuild": "yarn run generate",
     "deploy": "snowpack build && rsync -avp build/ core@abrie.dev:/home/core/data/doodleopia/www",

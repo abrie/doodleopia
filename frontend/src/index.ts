@@ -4,11 +4,8 @@ import CursorTracker, { CursorTrackerEventHandler } from "./cursortracker";
 import PointerTracker, { PointerTrackerEventHandler } from "./pointertracker";
 import Polylines, { PolylineEventHandler } from "./polylines";
 import PathTracker, { PathTrackerEventHandler } from "./pathtracker";
-import Messages, {
-  MessagesEventHandler,
-  Message,
-  FlatbufferMessage,
-} from "./messages";
+import Messages, { MessagesEventHandler } from "./messages";
+import Message, { FlatbufferMessage } from "./message";
 import Store, { StoreEventHandler } from "./store";
 import PathProcessor, { PathProcessorEventHandler } from "./pathprocessor";
 import { TurtleEventHandler } from "./turtle";
