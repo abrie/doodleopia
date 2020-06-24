@@ -54,7 +54,7 @@ func (s *Collector) Read() ([][]byte, error) {
 			return messages, err
 		}
 		if int64(n) != size {
-			return messages, err
+			return messages, err // TODO: return informative error insteal of nil
 		}
 
 		messages = append(messages, bytes)
