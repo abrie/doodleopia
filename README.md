@@ -7,6 +7,8 @@ Yet another collaborative drawing app from the 2020 Pandemic.
 - Uses SVG, no canvas.
 - Shared cursors over websockets.
 - Features a 'Turtle' and L-systems.
+- Uses Google flatbuffers for messages.
+- 'Records' drawings and plays them back.
 
 ## See also
 
