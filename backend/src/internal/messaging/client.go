@@ -1,4 +1,4 @@
-package message
+package messaging
 
 import (
 	"bytes"
@@ -9,9 +9,10 @@ import (
 )
 
 type Client struct {
-	hub  *Hub
-	conn *websocket.Conn
-	send chan []byte
+	hub      *Hub
+	conn     *websocket.Conn
+	send     chan []byte
+	playback chan [][]byte
 }
 
 type InboundMessage struct {
@@ -79,6 +80,33 @@ func (c *Client) writePump() {
 
 	for {
 		select {
+		case messages, ok := <-c.playback:
+			if len(messages) == 0 {
+				break
+			}
+			c.conn.SetWriteDeadline(time.Now().Add(writeWait))
+			if !ok {
+				// The hub closed the channel.
+				c.conn.WriteMessage(websocket.CloseMessage, []byte{})
+				return
+			}
+			w, err := c.conn.NextWriter(websocket.TextMessage)
+			if err != nil {
+				log.Printf("client writePump failed to get a Writer: %v", err)
+				return
+			}
+
+			w.Write(messages[0])
+			for i := 1; i < len(messages); i++ {
+				w.Write(newline)
+				w.Write(messages[i])
+			}
+
+			if err := w.Close(); err != nil {
+				log.Printf("client writePump failed to close Writer: %v", err)
+				return
+			}
+
 		case message, ok := <-c.send:
 			c.conn.SetWriteDeadline(time.Now().Add(writeWait))
 			if !ok {

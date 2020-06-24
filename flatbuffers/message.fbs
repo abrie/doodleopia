@@ -1,0 +1,17 @@
+namespace message;
+
+enum Action:byte {Up,Down,Move,Clear,Cursor}
+
+struct Coordinate {
+  x:float;
+  y:float;
+}
+
+table Message {
+  clientId:string;
+  id:int;
+  data:Coordinate;
+  action:Action;
+}
+
+root_type Message;

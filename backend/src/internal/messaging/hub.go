@@ -1,4 +1,9 @@
-package message
+package messaging
+
+import (
+	"backend/internal/collector"
+	"log"
+)
 
 type Hub struct {
 	// Registered clients.
@@ -10,13 +15,13 @@ type Hub struct {
 	register chan *Client
 
 	// Message size stats
-	collector *Collector
+	collector *collector.Collector
 
 	// Unregister requests from clients.
 	unregister chan *Client
 }
 
-func newHub(collector *Collector) *Hub {
+func newHub(collector *collector.Collector) *Hub {
 	return &Hub{
 		inbound:    make(chan *InboundMessage),
 		register:   make(chan *Client),
@@ -32,12 +37,18 @@ func (h *Hub) run() {
 
 		case client := <-h.register:
 			h.clients[client] = true
+			messages, err := h.collector.Read()
+			if err != nil {
+				log.Printf("Failed to read from log: %v", err)
+			} else {
+				h.sendPlayback(client, messages)
+			}
 
 		case client := <-h.unregister:
 			h.unregisterClient(client)
 
 		case message := <-h.inbound:
-			h.collector.Sink <- int64(len(*message.Payload))
+			h.collector.Sink <- message.Payload
 			for client := range h.clients {
 				if client != message.Source {
 					h.sendMessage(client, *message.Payload)
@@ -53,6 +64,18 @@ func (h *Hub) sendMessage(client *Client, message []byte) {
 	case client.send <- message:
 
 	default: // If the send channel buffer is full, close the client.
+		log.Printf("Send channel is full, disconnecting client.")
+		h.unregisterClient(client)
+	}
+}
+
+func (h *Hub) sendPlayback(client *Client, messages [][]byte) {
+	select {
+
+	case client.playback <- messages:
+
+	default: // If the playback channel buffer is full, close the client.
+		log.Printf("Playback channel is full, disconnecting client.")
 		h.unregisterClient(client)
 	}
 }

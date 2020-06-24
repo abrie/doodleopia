@@ -1,4 +1,4 @@
-package message
+package messaging
 
 import (
 	"github.com/gorilla/websocket"
@@ -19,7 +19,7 @@ func GetHandler(hub *Hub) http.HandlerFunc {
 			return
 		}
 
-		client := &Client{hub: hub, conn: conn, send: make(chan []byte, 1028)}
+		client := &Client{hub: hub, conn: conn, send: make(chan []byte, 1028), playback: make(chan [][]byte, 1)}
 		client.hub.register <- client
 
 		go client.writePump()

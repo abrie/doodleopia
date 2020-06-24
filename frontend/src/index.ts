@@ -86,24 +86,24 @@ const pathTracker = new PathTracker(<PathTrackerEventHandler>{
 const pathProcessor = new PathProcessor(<PathProcessorEventHandler>{
   onNewPath: (a: AttributedCoordinates) => {
     polylines.startPolyline(a);
-    messages.send({ action: "start-polyline", ...a });
+    //messages.send({ action: "start-polyline", ...a });
   },
   onFinishedPath: (a: AttributedCoordinates) => {
     polylines.finishPolyline(a);
     store.pushAttributedCoordinates(a);
-    messages.send({ action: "finish-polyline", ...a });
+    //messages.send({ action: "finish-polyline", ...a });
   },
   onUpdatedPath: (a: AttributedCoordinates) => {
     polylines.updatePolyline(a);
-    messages.send({ action: "update-polyline", ...a });
+    //messages.send({ action: "update-polyline", ...a });
   },
   onCanceledPath: (a: AttributedCoordinates) => {
     polylines.cancelPolyline(a);
-    messages.send({ action: "cancel-polyline", ...a });
+    //messages.send({ action: "cancel-polyline", ...a });
   },
   onCreatedPath: (a: AttributedCoordinates) => {
     polylines.createPolyline(a);
-    messages.send({ action: "create-polyline", ...a });
+    //messages.send({ action: "create-polyline", ...a });
   },
 });
 
@@ -151,9 +151,21 @@ function messageToAttributedCoordinates({
   };
 }
 
+function messageToAttributedCoordinate({
+  clientId,
+  id,
+  data,
+}): AttributedCoordinate {
+  return <AttributedCoordinate>{
+    id: `${clientId}.${id}`,
+    data: data,
+  };
+}
+
 function processMessage(message: Message) {
   const { action } = message;
   switch (action) {
+    /*
     case "start-polyline":
       polylines.startPolyline(messageToAttributedCoordinates(message));
       break;
@@ -165,6 +177,20 @@ function processMessage(message: Message) {
       break;
     case "cancel-polyline":
       polylines.cancelPolyline(messageToAttributedCoordinates(message));
+      break;
+      */
+    case "clear":
+      canvas.clear();
+      store.clearPathRecord();
+      break;
+    case "down":
+      pathTracker.startPath(messageToAttributedCoordinate(message));
+      break;
+    case "up":
+      pathTracker.finishPath(messageToAttributedCoordinate(message));
+      break;
+    case "move":
+      pathTracker.updatePath(messageToAttributedCoordinate(message));
       break;
     case "cursor":
       const { clientId, data } = message;
@@ -191,6 +217,9 @@ function attachUIEventHandlers() {
   document.getElementById("clear-button").addEventListener("click", () => {
     canvas.clear();
     store.clearPathRecord();
+    messages.send({
+      action: "clear",
+    });
   });
 
   document

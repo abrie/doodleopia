@@ -1,7 +1,7 @@
 package main
 
 import (
-	"backend/internal/message"
+	"backend/internal/messaging"
 	"backend/internal/vector"
 
 	"flag"
@@ -33,7 +33,7 @@ func main() {
 		func() {
 			defer wg.Done()
 
-			store := message.Store{
+			store := messaging.Store{
 				Directory: path.Join(*directory, "message"),
 				Stop:      stop}
 

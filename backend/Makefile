@@ -3,6 +3,7 @@ PWD=$(shell pwd)
 BIN_DIR=$(PWD)/bin
 SRC_DIR=$(PWD)/src
 BIN_NAME=service
+FLATBUFFERS_SRC=$(PWD)/../flatbuffers
 DATA_DIR?=$(PWD)/data
 
 all: build
@@ -14,7 +15,11 @@ initialize-dependencies:
 update-dependencies:
 	cd $(SRC_DIR) && go get -u ./...
 
-build:
+generate:
+	@rm -rf message
+	@flatc --go -o $(PWD)/src/internal $(FLATBUFFERS_SRC)/message.fbs
+
+build: generate
 	cd $(SRC_DIR) && go build -v -o $(BIN_DIR)/$(BIN_NAME) backend/cmd/system
 
 container:

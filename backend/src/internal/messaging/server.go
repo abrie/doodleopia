@@ -1,4 +1,4 @@
-package message
+package messaging
 
 import (
 	"context"
@@ -11,6 +11,8 @@ import (
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/cors"
+
+	"backend/internal/collector"
 )
 
 func (store *Store) Serve(port int) {
@@ -21,13 +23,18 @@ func (store *Store) Serve(port int) {
 		log.Fatalf("Failed to create message store: %v", err)
 	}
 
-	statsPath := path.Join(storePath, "sizes.log")
-	statsOutput, err := os.OpenFile(statsPath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, os.ModePerm)
+	collectorPath := path.Join(storePath, "collected.bin")
+	collectorWriter, err := os.OpenFile(collectorPath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, os.ModePerm)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	collector := NewCollector(statsOutput)
+	collectorReader, err := os.Open(collectorPath)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	collector := collector.NewCollector(collectorWriter, collectorReader)
 	collector.Start()
 	hub := newHub(collector)
 	go hub.run()
@@ -56,7 +63,6 @@ func (store *Store) Serve(port int) {
 
 	collector.Stop()
 	<-collector.Finished
-
 }
 
 func newCorsHandler() func(http.Handler) http.Handler {
