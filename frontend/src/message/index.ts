@@ -4,6 +4,8 @@ import type {
   AttributedCoordinate,
 } from "../coordinates";
 
+import { flatbuffers } from "flatbuffers";
+
 import { message as FlatbufferMessage } from "./message_generated";
 
 export { FlatbufferMessage };
@@ -26,4 +28,40 @@ export default class Message implements MessageInterface {
   static deserialize(raw: string): Message[] {
     return raw.split("\n").map((msg) => JSON.parse(msg));
   }
+}
+
+export function buildFlatbuffer(payload): Uint8Array {
+  let builder = new flatbuffers.Builder(100);
+  let clientId = builder.createString(this.clientId);
+
+  FlatbufferMessage.Message.startMessage(builder);
+  FlatbufferMessage.Message.addClientId(builder, clientId);
+  FlatbufferMessage.Message.addAction(builder, payload.action);
+
+  FlatbufferMessage.Message.addId(builder, payload.id);
+
+  let data = FlatbufferMessage.Coordinate.createCoordinate(
+    builder,
+    payload.data[0],
+    payload.data[1]
+  );
+  FlatbufferMessage.Message.addData(builder, data);
+
+  let message = FlatbufferMessage.Message.endMessage(builder);
+  FlatbufferMessage.Message.finishMessageBuffer(builder, message);
+
+  return builder.asUint8Array();
+}
+
+export function readFlatbuffer(payload: Uint8Array) {
+  let buf = new flatbuffers.ByteBuffer(payload);
+  let message = FlatbufferMessage.Message.getRootAsMessage(buf);
+  let data = message.data();
+
+  return {
+    clientId: message.clientId(),
+    id: message.id(),
+    action: message.action(),
+    data: data ? [data.x(), data.y()] : undefined,
+  };
 }
