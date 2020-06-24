@@ -40,12 +40,14 @@ export function buildFlatbuffer(payload): Uint8Array {
 
   FlatbufferMessage.Message.addId(builder, payload.id);
 
-  let data = FlatbufferMessage.Coordinate.createCoordinate(
-    builder,
-    payload.data[0],
-    payload.data[1]
-  );
-  FlatbufferMessage.Message.addData(builder, data);
+  if (payload.data) {
+    let data = FlatbufferMessage.Coordinate.createCoordinate(
+      builder,
+      payload.data[0],
+      payload.data[1]
+    );
+    FlatbufferMessage.Message.addData(builder, data);
+  }
 
   let message = FlatbufferMessage.Message.endMessage(builder);
   FlatbufferMessage.Message.finishMessageBuffer(builder, message);
