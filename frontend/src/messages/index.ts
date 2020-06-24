@@ -29,6 +29,8 @@ export default class implements MessagesInterface {
 
   constructor(eventHandler: MessagesEventHandler) {
     this.eventHandler = eventHandler;
+
+    this.runTests();
   }
 
   get url() {
@@ -37,22 +39,28 @@ export default class implements MessagesInterface {
   }
 
   open() {
-    console.log("Opening connection...");
+    window.clearTimeout(this.timerId);
     this.conn = new WebSocket(this.url);
+    //this.conn.bufferType = "arraybuffer";
+
     this.conn.onopen = (evt) => {
-      window.clearTimeout(this.timerId);
       this.eventHandler.onOpen();
     };
+
     this.conn.onerror = (evt) => {
       this.conn = undefined;
       this.eventHandler.onError();
     };
+
     this.conn.onclose = (evt) => {
       this.conn = undefined;
       this.timerId = window.setTimeout(() => this.open(), 250);
       this.eventHandler.onClose();
     };
-    this.conn.onmessage = (evt) => this.receive(evt.data);
+
+    this.conn.onmessage = (evt) => {
+      this.receive(evt.data);
+    };
   }
 
   get isOpen() {
@@ -67,29 +75,46 @@ export default class implements MessagesInterface {
     }
   }
 
-  sendFlatbuffer(payload) {
-    let builder = new flatbuffers.Builder(1024);
-    FlatbufferMessage.Message.startMessage(builder);
+  stringToAction(str) {
+    switch (str) {
+      case "up":
+        return FlatbufferMessage.Action.Up;
+      case "down":
+        return FlatbufferMessage.Action.Down;
+      case "move":
+        return FlatbufferMessage.Action.Move;
+      case "clear":
+        return FlatbufferMessage.Action.Clear;
+      case "cursor":
+        return FlatbufferMessage.Action.Cursor;
+      default:
+        console.error(`Action string does not map to enum: "${str}"`);
+    }
+  }
 
+  runTests() {
+    const payload1 = {
+      action: "cursor",
+      id: 0,
+      data: [112.06227111816406, 528.9884033203125],
+    };
+
+    this.testFlatbuffer(payload1);
+  }
+
+  testFlatbuffer(payload) {
+    const buf = this.buildFlatbuffer(payload);
+    const decoded = this.readFlatbuffer(buf);
+  }
+
+  buildFlatbuffer(payload) {
+    let builder = new flatbuffers.Builder(80);
     let clientId = builder.createString(this.clientId);
+
+    FlatbufferMessage.Message.startMessage(builder);
     FlatbufferMessage.Message.addClientId(builder, clientId);
 
-    let action = ((str) => {
-      switch (str) {
-        case "up":
-          return FlatbufferMessage.Action.Up;
-        case "down":
-          return FlatbufferMessage.Action.Down;
-        case "move":
-          return FlatbufferMessage.Action.Move;
-        case "clear":
-          return FlatbufferMessage.Action.Clear;
-        case "cursor":
-          return FlatbufferMessage.Action.Cursor;
-        default:
-          console.error(`Action string does not map to enum: "${str}"`);
-      }
-    })(payload.action);
+    let action = this.stringToAction(payload.action);
     FlatbufferMessage.Message.addAction(builder, action);
 
     FlatbufferMessage.Message.addId(builder, payload.id);
@@ -101,14 +126,27 @@ export default class implements MessagesInterface {
     );
     FlatbufferMessage.Message.addData(builder, data);
 
-    FlatbufferMessage.Message.endMessage(builder);
+    let message = FlatbufferMessage.Message.endMessage(builder);
+    FlatbufferMessage.Message.finishMessageBuffer(builder, message);
 
-    let buf = builder.asUint8Array();
-    console.log(buf);
+    return builder.asUint8Array();
+  }
+
+  readFlatbuffer(payload) {
+    let buf = new flatbuffers.ByteBuffer(payload);
+    let message = FlatbufferMessage.Message.getRootAsMessage(buf);
+    let data = message.data();
+    const result = {
+      clientId: message.clientId(),
+      id: message.id(),
+      action: message.action(),
+      data: [message.data().x(), message.data().y()],
+    };
+
+    console.log(result);
   }
 
   send(data) {
-    this.sendFlatbuffer(data);
     if (this.isOpen) {
       const message = { ...data, clientId: this.clientId };
       this.conn.send(Message.serialize(message));
