@@ -1,19 +1,30 @@
 # Doodleopia
 
-Yet another collaborative drawing app from the 2020 Pandemic.
+Yet another collaborative drawing app, born from the [2020 Pandemic](https://en.wikipedia.org/wiki/COVID-19_pandemic).
 
 ## Features/Shortcomings
 
-- Uses SVG, no canvas.
-- Shared cursors over websockets.
-- Features a 'Turtle' and L-systems.
-- Uses Google FlatBuffers for messages.
-- 'Records' drawings and plays them back.
+- SVG with no canvas intermediate.
+- Shared cursors for collaborative feedback.
+- Continuous 'Recording' of drawings with playback.
+- ['Turtle'](https://en.wikipedia.org/wiki/Turtle_graphics) and a 2d [L-systems](https://en.wikipedia.org/wiki/L-system) interpreter (hidden feature).
+
+# Implementation Details
+
+- Go backend using [Gorilla for websockets](https://www.gorillatoolkit.org/pkg/websocket).
+- Vanilla Typescript frontend, no framework.
+- Uses [FlatBuffers](https://google.github.io/flatbuffers/) for messaging.
+- Uses [Snowpack](https://snowpack.dev) for frontend dev. (cool)
 
 ## See also
 
-- https://excalidraw.com/
 - https://wbo.ophir.dev/
+- https://excalidraw.com/
 - https://doodledocs.com
 - https://multiuser-sketchpad.glitch.me
   https://hundredrabbits.github.io/Noodle/
+
+## Addendum
+
+Username: doodleopia
+Password: letmein
