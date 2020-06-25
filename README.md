@@ -22,7 +22,7 @@ Yet another collaborative drawing app, born from the [2020 Pandemic](https://en.
 - https://excalidraw.com/
 - https://doodledocs.com
 - https://multiuser-sketchpad.glitch.me
-  https://hundredrabbits.github.io/Noodle/
+- https://hundredrabbits.github.io/Noodle/
 
 ## Addendum
 
