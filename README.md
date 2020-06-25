@@ -26,6 +26,4 @@ Yet another collaborative drawing app, born from the [2020 Pandemic](https://en.
 
 ## Addendum
 
-[https://doodleopia.com](https://doodleopia.com?ref=github)
-Username: doodleopia
-Password: letmein
+Try this link to try the app: [https://doodleopia.com](https://doodleopia:letmein@doodleopia.com?ref=github)
