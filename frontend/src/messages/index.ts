@@ -19,7 +19,6 @@ export default class implements MessagesInterface {
   clientId: number = Math.floor(Math.random() * 65535);
   eventHandler: MessagesEventHandler;
   conn: WebSocket;
-  sent: ArrayBuffer;
   timerId: number | undefined;
 
   constructor(eventHandler: MessagesEventHandler) {
