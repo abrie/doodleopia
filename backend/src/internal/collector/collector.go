@@ -63,8 +63,21 @@ func (s *Collector) Read() ([][]byte, error) {
 	return messages, nil
 }
 
-type Message struct {
-	Action string `json:"action,omitempty"`
+func messageOk(payload *[]byte) (result bool) {
+	defer func() {
+		// If the payload is an invalid flatbuffer then it will panic. Catch it here.
+		if err := recover(); err != nil {
+			result = false
+		}
+	}()
+
+	msg := message.GetRootAsMessage(*payload, 0)
+
+	if msg.Action() == message.ActionCursor {
+		return false
+	}
+
+	return true
 }
 
 func (s *Collector) Start() {
@@ -72,8 +85,7 @@ func (s *Collector) Start() {
 		for {
 			select {
 			case payload := <-s.Sink:
-				msg := message.GetRootAsMessage(*payload, 0)
-				if msg.Action() == message.ActionCursor {
+				if messageOk(payload) == false {
 					break
 				}
 				size := int64(len(*payload))
