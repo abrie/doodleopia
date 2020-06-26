@@ -6,6 +6,7 @@ Yet another collaborative drawing app, born from the [2020 Pandemic](https://en.
 
 - SVG with no canvas intermediate.
 - Shared cursors for collaborative feedback.
+- Zoomable.
 - Continuous 'Recording' of drawings with playback.
 - ['Turtle'](https://en.wikipedia.org/wiki/Turtle_graphics) and a 2d [L-systems](https://en.wikipedia.org/wiki/L-system) interpreter (hidden feature).
 
@@ -23,6 +24,7 @@ Yet another collaborative drawing app, born from the [2020 Pandemic](https://en.
 - https://doodledocs.com
 - https://multiuser-sketchpad.glitch.me
 - https://hundredrabbits.github.io/Noodle/
+- https://www.whiteborb.com/FFqmdOXEVM
 
 ## Addendum
 
