@@ -3,12 +3,12 @@ namespace message;
 enum Action:byte {Up,Down,Move,Clear,Cursor,Cancel}
 
 struct Coordinate {
-  x:float;
-  y:float;
+  x:float32;
+  y:float32;
 }
 
 table Message {
-  clientId:string;
+  clientId:uint16;
   id:int;
   data:Coordinate;
   action:Action;

@@ -54,11 +54,10 @@ func NewTestCollector() *Collector {
 
 }
 
-func buildMessage(clientId string, action message.Action, x, y float32) []byte {
+func buildMessage(clientId uint16, action message.Action, x, y float32) []byte {
 	builder := flatbuffers.NewBuilder(80)
-	clientIdStr := builder.CreateString(clientId)
 	message.MessageStart(builder)
-	message.MessageAddClientId(builder, clientIdStr)
+	message.MessageAddClientId(builder, clientId)
 	message.MessageAddAction(builder, action)
 	message.MessageAddData(builder, message.CreateCoordinate(builder, x, y))
 	message.MessageAddId(builder, 0)
@@ -70,10 +69,10 @@ func buildMessage(clientId string, action message.Action, x, y float32) []byte {
 
 func TestCollectorValidMessages(t *testing.T) {
 	messages := [][]byte{
-		buildMessage("123-456-1010", message.ActionDown, 60.1, 60.2),
-		buildMessage("123-456-1010", message.ActionMove, 100.5, 200.5),
-		buildMessage("123-456-1010", message.ActionCursor, 100.5, 200.5),
-		buildMessage("123-456-1010", message.ActionUp, 200.5, 230.5),
+		buildMessage(12345, message.ActionDown, 60.1, 60.2),
+		buildMessage(12345, message.ActionMove, 100.5, 200.5),
+		buildMessage(12345, message.ActionCursor, 100.5, 200.5),
+		buildMessage(12345, message.ActionUp, 200.5, 230.5),
 	}
 
 	/* "Cursor" message should be ignored, and not present in the returned list. */

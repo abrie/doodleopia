@@ -1,4 +1,3 @@
-import { v4 as uuidv4 } from "uuid";
 import type { Coordinate } from "../coordinates";
 import Message, { buildFlatbuffer, readFlatbuffer } from "../message";
 
@@ -17,7 +16,7 @@ interface MessagesInterface {
 }
 
 export default class implements MessagesInterface {
-  clientId: string = uuidv4();
+  clientId: number = Math.floor(Math.random() * 65535);
   eventHandler: MessagesEventHandler;
   conn: WebSocket;
   sent: ArrayBuffer;

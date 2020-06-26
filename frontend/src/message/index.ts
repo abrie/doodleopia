@@ -11,12 +11,12 @@ import { message as FlatbufferMessage } from "./message_generated";
 export const MessageAction = FlatbufferMessage.Action;
 
 export interface MessageInterface extends AttributedCoordinate {
-  clientId: string;
+  clientId: number;
   action: FlatbufferMessage.Action;
 }
 
 export default class Message implements MessageInterface {
-  clientId: string;
+  clientId: number;
   action: FlatbufferMessage.Action;
   id: Attribution;
   data: Coordinate;
@@ -32,12 +32,9 @@ export default class Message implements MessageInterface {
 
 export function buildFlatbuffer(payload): Uint8Array {
   let builder = new flatbuffers.Builder(100);
-  let clientId = builder.createString(payload.clientId);
-
   FlatbufferMessage.Message.startMessage(builder);
-  FlatbufferMessage.Message.addClientId(builder, clientId);
+  FlatbufferMessage.Message.addClientId(builder, payload.clientId);
   FlatbufferMessage.Message.addAction(builder, payload.action);
-
   FlatbufferMessage.Message.addId(builder, payload.id);
 
   if (payload.data) {

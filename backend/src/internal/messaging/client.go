@@ -33,11 +33,6 @@ const (
 	maxMessageSize = 1024 * 10
 )
 
-var (
-	newline = []byte{'\n'}
-	space   = []byte{' '}
-)
-
 func (c *Client) pongHandler(string) error {
 	c.conn.SetReadDeadline(time.Now().Add(pongWait))
 	return nil
@@ -78,15 +73,15 @@ func (c *Client) writePump() {
 	for {
 		select {
 		case messages, ok := <-c.playback:
+			c.conn.SetWriteDeadline(time.Now().Add(writeWait))
 			if !ok {
-				c.conn.SetWriteDeadline(time.Now().Add(writeWait))
 				// The hub closed the channel.
 				c.conn.WriteMessage(websocket.CloseMessage, []byte{})
 				return
 			}
 			for idx := range messages {
 				if err := c.conn.WriteMessage(websocket.BinaryMessage, messages[idx]); err != nil {
-					log.Printf("Failed to write message to client: %v\n", err)
+					log.Printf("Unable to write message to websocket: %v\n", err)
 					break
 				}
 			}
@@ -101,13 +96,13 @@ func (c *Client) writePump() {
 			}
 
 			if err := c.conn.WriteMessage(websocket.BinaryMessage, bytes); err != nil {
-				log.Printf("Failed to write message to client: %v\n", err)
+				log.Printf("Unable to write message to websocket: %v\n", err)
 			}
 
 		case <-ticker.C:
 			c.conn.SetWriteDeadline(time.Now().Add(writeWait))
 			if err := c.conn.WriteMessage(websocket.PingMessage, nil); err != nil {
-				log.Printf("client writePump failed to write PingMessage: %v", err)
+				log.Printf("Unable to write PingMessage: %v\n", err)
 				return
 			}
 		}

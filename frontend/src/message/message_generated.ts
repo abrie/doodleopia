@@ -101,14 +101,11 @@ static getSizePrefixedRootAsMessage(bb:flatbuffers.ByteBuffer, obj?:Message):Mes
 };
 
 /**
- * @param flatbuffers.Encoding= optionalEncoding
- * @returns string|Uint8Array|null
+ * @returns number
  */
-clientId():string|null
-clientId(optionalEncoding:flatbuffers.Encoding):string|Uint8Array|null
-clientId(optionalEncoding?:any):string|Uint8Array|null {
+clientId():number {
   var offset = this.bb!.__offset(this.bb_pos, 4);
-  return offset ? this.bb!.__string(this.bb_pos + offset, optionalEncoding) : null;
+  return offset ? this.bb!.readUint16(this.bb_pos + offset) : 0;
 };
 
 /**
@@ -145,10 +142,10 @@ static startMessage(builder:flatbuffers.Builder) {
 
 /**
  * @param flatbuffers.Builder builder
- * @param flatbuffers.Offset clientIdOffset
+ * @param number clientId
  */
-static addClientId(builder:flatbuffers.Builder, clientIdOffset:flatbuffers.Offset) {
-  builder.addFieldOffset(0, clientIdOffset, 0);
+static addClientId(builder:flatbuffers.Builder, clientId:number) {
+  builder.addFieldInt16(0, clientId, 0);
 };
 
 /**
@@ -200,9 +197,9 @@ static finishSizePrefixedMessageBuffer(builder:flatbuffers.Builder, offset:flatb
   builder.finish(offset, undefined, true);
 };
 
-static createMessage(builder:flatbuffers.Builder, clientIdOffset:flatbuffers.Offset, id:number, dataOffset:flatbuffers.Offset, action:message.Action):flatbuffers.Offset {
+static createMessage(builder:flatbuffers.Builder, clientId:number, id:number, dataOffset:flatbuffers.Offset, action:message.Action):flatbuffers.Offset {
   Message.startMessage(builder);
-  Message.addClientId(builder, clientIdOffset);
+  Message.addClientId(builder, clientId);
   Message.addId(builder, id);
   Message.addData(builder, dataOffset);
   Message.addAction(builder, action);
