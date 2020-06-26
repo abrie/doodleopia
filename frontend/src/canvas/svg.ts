@@ -5,11 +5,16 @@ export interface ViewBox {
   height: number;
 }
 
-export function zoomViewBox(viewBox: ViewBox, factor: number): ViewBox {
+export function zoomViewBox(
+  viewBox: ViewBox,
+  factor: number,
+  panX: number,
+  panY: number
+): ViewBox {
   const width = viewBox.width * factor;
   const height = viewBox.height * factor;
-  const left = (viewBox.width - viewBox.width * factor) / 2;
-  const top = (viewBox.height - viewBox.height * factor) / 2;
+  const left = (viewBox.width - viewBox.width * factor) / 2 + panX;
+  const top = (viewBox.height - viewBox.height * factor) / 2 + panY;
 
   return <ViewBox>{
     left,

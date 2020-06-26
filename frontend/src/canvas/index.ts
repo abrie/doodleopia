@@ -28,7 +28,10 @@ export default class Canvas implements CanvasInterface {
   workingCanvas: SVGSVGElement = undefined;
   finishedCanvas: SVGSVGElement = undefined;
   cursorCanvas: SVGSVGElement = undefined;
-  zoomFactor: number;
+  zoomFactor: number = 1.0;
+  panX: number = 0;
+  panY: number = 0;
+  animationFrameRequest: number = 0;
   baseViewBox: ViewBox = { left: 0, top: 0, width: 1600, height: 900 };
   viewBox: ViewBox = { ...this.baseViewBox };
   domParser = new DOMParser();
@@ -42,6 +45,24 @@ export default class Canvas implements CanvasInterface {
     target.appendChild(this.workingCanvas);
     target.appendChild(this.finishedCanvas);
     target.appendChild(this.cursorCanvas);
+
+    const el = document.createElement("div");
+    el.setAttribute("id", "scroller");
+    target.appendChild(el);
+
+    const el2 = document.createElement("div");
+    el2.setAttribute("id", "scroll-child");
+    el.appendChild(el2);
+
+    el.addEventListener("scroll", (evt) => {
+      this.panX =
+        (evt.currentTarget.scrollLeft / evt.currentTarget.scrollWidth) *
+        this.baseViewBox.width;
+      this.panY =
+        (evt.currentTarget.scrollTop / evt.currentTarget.scrollHeight) *
+        this.baseViewBox.height;
+      this.zoom = this.zoomFactor; // Force redraw
+    });
 
     attachEventHandler(
       target,
@@ -83,10 +104,18 @@ export default class Canvas implements CanvasInterface {
 
   set zoom(f: number) {
     this.zoomFactor = f;
-    this.viewBox = zoomViewBox(this.baseViewBox, f);
-    setSvgViewBox(this.workingCanvas, this.viewBox);
-    setSvgViewBox(this.finishedCanvas, this.viewBox);
-    setSvgViewBox(this.cursorCanvas, this.viewBox);
+    this.viewBox = zoomViewBox(this.baseViewBox, f, this.panX, this.panY);
+
+    if (this.animationFrameRequest) {
+      window.cancelAnimationFrame(this.animationFrameRequest);
+    }
+
+    this.animationFrameRequest = window.requestAnimationFrame(() => {
+      setSvgViewBox(this.workingCanvas, this.viewBox);
+      setSvgViewBox(this.finishedCanvas, this.viewBox);
+      setSvgViewBox(this.cursorCanvas, this.viewBox);
+      this.animationFrameRequest = undefined;
+    });
   }
 
   get zoom(): number {
