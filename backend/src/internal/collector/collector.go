@@ -68,6 +68,7 @@ func messageOk(payload *[]byte) (result bool) {
 		// If the payload is an invalid flatbuffer then it will panic. Catch it here.
 		if err := recover(); err != nil {
 			result = false
+		} else {
 		}
 	}()
 

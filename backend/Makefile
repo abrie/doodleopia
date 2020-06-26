@@ -6,7 +6,7 @@ BIN_NAME=service
 FLATBUFFERS_SRC=$(PWD)/../flatbuffers
 DATA_DIR?=$(PWD)/data
 
-all: build
+all: generate build
 
 initialize-dependencies:
 	-@go mod init
@@ -19,7 +19,7 @@ generate:
 	@rm -rf message
 	@flatc --go -o $(PWD)/src/internal $(FLATBUFFERS_SRC)/message.fbs
 
-build: generate
+build:
 	cd $(SRC_DIR) && go build -v -o $(BIN_DIR)/$(BIN_NAME) backend/cmd/system
 
 container:
