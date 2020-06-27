@@ -55,12 +55,12 @@ export default class Canvas implements CanvasInterface {
     el.appendChild(el2);
 
     el.addEventListener("scroll", (evt) => {
+      const target = evt.currentTarget as HTMLDivElement;
+
       this.panX =
-        (evt.currentTarget.scrollLeft / evt.currentTarget.scrollWidth) *
-        this.baseViewBox.width;
+        (target.scrollLeft / target.scrollWidth) * this.baseViewBox.width;
       this.panY =
-        (evt.currentTarget.scrollTop / evt.currentTarget.scrollHeight) *
-        this.baseViewBox.height;
+        (target.scrollTop / target.scrollHeight) * this.baseViewBox.height;
       this.zoom = this.zoomFactor; // Force redraw
     });
 
