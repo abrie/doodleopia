@@ -5,36 +5,30 @@ export interface ViewBox {
   height: number;
 }
 
-export function scaleZoom(
-  domain: [number, number, number],
-  range: [number, number, number],
-  val: number
-): number {
-  const [minDomain, maxDomain, midDomain] = domain;
-  const [minRange, maxRange, midRange] = range;
-  if (val == midDomain) {
-    return midRange;
-  }
-  if (val < midDomain) {
-    const p = (val - minDomain) / (midDomain - minDomain);
-    return p * (midRange - minRange) + minRange;
-  }
-  if (val > midDomain) {
-    const p = (val - midDomain) / (maxDomain - midDomain);
-    return p * (maxRange - midRange) + midRange;
-  }
-}
-
-export function zoomViewBox(
+export function panViewBox(
+  baseViewBox: ViewBox,
   viewBox: ViewBox,
-  factor: number,
+  maxZoom: number,
   panX: number,
   panY: number
 ): ViewBox {
+  const maxZoomedViewBox = zoomViewBox(baseViewBox, maxZoom);
+  const dWidth = Math.abs(maxZoomedViewBox.width - viewBox.width);
+  const dHeight = Math.abs(maxZoomedViewBox.height - viewBox.height);
+
+  return {
+    left: viewBox.left + panX * dWidth,
+    top: viewBox.top + panY * dHeight,
+    width: viewBox.width,
+    height: viewBox.height,
+  };
+}
+
+export function zoomViewBox(viewBox: ViewBox, factor: number): ViewBox {
   const width = viewBox.width * factor;
   const height = viewBox.height * factor;
-  const left = (viewBox.width - viewBox.width * factor) / 2 + panX;
-  const top = (viewBox.height - viewBox.height * factor) / 2 + panY;
+  const left = (viewBox.width - viewBox.width * factor) / 2;
+  const top = (viewBox.height - viewBox.height * factor) / 2;
 
   return <ViewBox>{
     left,

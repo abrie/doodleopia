@@ -5,10 +5,8 @@ import {
   ViewBox,
   setSvgViewBox,
   zoomViewBox,
-  scaleZoom,
+  panViewBox,
 } from "./svg";
-
-export { scaleZoom };
 
 interface CanvasInterface {
   startPolyline: (element: SVGElement) => void;
@@ -65,10 +63,8 @@ export default class Canvas implements CanvasInterface {
     el.addEventListener("scroll", (evt) => {
       const target = evt.currentTarget as HTMLDivElement;
 
-      this.panX =
-        (target.scrollLeft / target.scrollWidth) * this.baseViewBox.width;
-      this.panY =
-        (target.scrollTop / target.scrollHeight) * this.baseViewBox.height;
+      this.panX = Math.min(0.5, target.scrollLeft / target.scrollWidth);
+      this.panY = Math.min(0.5, target.scrollTop / target.scrollHeight);
       this.zoom = this.zoomFactor; // Force redraw
     });
 
@@ -112,7 +108,8 @@ export default class Canvas implements CanvasInterface {
 
   set zoom(f: number) {
     this.zoomFactor = f;
-    this.viewBox = zoomViewBox(this.baseViewBox, f, this.panX, this.panY);
+
+    this.viewBox = zoomViewBox(this.baseViewBox, f);
 
     if (this.animationFrameRequest) {
       window.cancelAnimationFrame(this.animationFrameRequest);

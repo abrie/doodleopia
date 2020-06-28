@@ -1,15 +1,7 @@
-import { zoomViewBox, scaleZoom } from "./svg";
+import { zoomViewBox, panViewBox } from "./svg";
 import type { ViewBox } from "./svg";
 
-test("scaleZoom works as expected", () => {
-  expect(scaleZoom([0, 100, 50], [0.5, 2, 1], 50)).toEqual(1);
-  expect(scaleZoom([0, 100, 50], [0.5, 2, 1], 25)).toEqual(0.75);
-  expect(scaleZoom([0, 100, 50], [0.5, 2, 1], 75)).toEqual(1.5);
-  expect(scaleZoom([0, 100, 50], [0.5, 2, 1], 1)).toEqual(0.51);
-  expect(scaleZoom([0, 100, 50], [0.5, 2, 1], 99)).toEqual(1.98);
-});
-
-test("zoomViewBox zooms in correctly", () => {
+test("zoomViewBox zooms in correctly.", () => {
   const baseViewBox: ViewBox = {
     top: 0,
     left: 0,
@@ -17,27 +9,7 @@ test("zoomViewBox zooms in correctly", () => {
     height: 600,
   };
 
-  const zoomedViewBox = zoomViewBox(baseViewBox, 2, 0, 0);
-
-  const expected = {
-    left: -950,
-    top: -300,
-    width: 3800,
-    height: 1200,
-  };
-
-  expect(zoomedViewBox).toEqual(expected);
-});
-
-test("zoomViewBox zooms out correctly", () => {
-  const baseViewBox: ViewBox = {
-    top: 0,
-    left: 0,
-    width: 1900,
-    height: 600,
-  };
-
-  const zoomedViewBox = zoomViewBox(baseViewBox, 0.5, 0, 0);
+  const zoomedViewBox = zoomViewBox(baseViewBox, 0.5);
 
   const expected = {
     left: 475,
@@ -47,4 +19,25 @@ test("zoomViewBox zooms out correctly", () => {
   };
 
   expect(zoomedViewBox).toEqual(expected);
+});
+
+test("panViewBox pans correctly.", () => {
+  const baseViewBox: ViewBox = {
+    top: 0,
+    left: 0,
+    width: 1900,
+    height: 600,
+  };
+
+  const zoomed = zoomViewBox(baseViewBox, 1);
+  const got = panViewBox(baseViewBox, zoomed, 2, 0.5, 0);
+
+  const expected = {
+    left: -950,
+    top: -300,
+    width: 3800,
+    height: 1200,
+  };
+
+  expect(got).toEqual(expected);
 });
