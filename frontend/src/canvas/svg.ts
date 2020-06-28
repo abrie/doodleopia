@@ -5,7 +5,7 @@ export interface ViewBox {
   height: number;
 }
 
-export function scaleValue(
+export function scaleZoom(
   domain: [number, number, number],
   range: [number, number, number],
   val: number

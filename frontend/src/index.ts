@@ -1,5 +1,5 @@
 import { AttributedCoordinate, AttributedCoordinates } from "./coordinates";
-import Canvas, { CanvasEventHandler, scaleValue } from "./canvas";
+import Canvas, { CanvasEventHandler, scaleZoom } from "./canvas";
 import CursorTracker, { CursorTrackerEventHandler } from "./cursortracker";
 import PointerTracker, { PointerTrackerEventHandler } from "./pointertracker";
 import Polylines, { PolylineEventHandler } from "./polylines";
@@ -199,7 +199,7 @@ function attachUIEventHandlers() {
     const minZoom = 0.05;
     const maxZoom = 5;
     const unityZoom = 1;
-    canvas.zoom = scaleValue(
+    canvas.zoom = scaleZoom(
       [min, max, mid],
       [minZoom, maxZoom, unityZoom],
       val

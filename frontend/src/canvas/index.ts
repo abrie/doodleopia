@@ -5,10 +5,10 @@ import {
   ViewBox,
   setSvgViewBox,
   zoomViewBox,
-  scaleValue,
+  scaleZoom,
 } from "./svg";
 
-export { scaleValue };
+export { scaleZoom };
 
 interface CanvasInterface {
   startPolyline: (element: SVGElement) => void;
