@@ -5,6 +5,26 @@ export interface ViewBox {
   height: number;
 }
 
+export function scaleValue(
+  domain: [number, number, number],
+  range: [number, number, number],
+  val: number
+): number {
+  const [minDomain, maxDomain, midDomain] = domain;
+  const [minRange, maxRange, midRange] = range;
+  if (val == midDomain) {
+    return midRange;
+  }
+  if (val < midDomain) {
+    const p = (val - minDomain) / (midDomain - minDomain);
+    return p * (midRange - minRange) + minRange;
+  }
+  if (val > midDomain) {
+    const p = (val - midDomain) / (maxDomain - midDomain);
+    return p * (maxRange - midRange) + midRange;
+  }
+}
+
 export function zoomViewBox(
   viewBox: ViewBox,
   factor: number,

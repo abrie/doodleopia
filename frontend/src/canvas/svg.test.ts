@@ -1,5 +1,13 @@
-import { zoomViewBox } from "./svg";
+import { zoomViewBox, scaleValue } from "./svg";
 import type { ViewBox } from "./svg";
+
+test("scaleValue works as expected", () => {
+  expect(scaleValue([0, 100, 50], [0.5, 2, 1], 50)).toEqual(1);
+  expect(scaleValue([0, 100, 50], [0.5, 2, 1], 25)).toEqual(0.75);
+  expect(scaleValue([0, 100, 50], [0.5, 2, 1], 75)).toEqual(1.5);
+  expect(scaleValue([0, 100, 50], [0.5, 2, 1], 1)).toEqual(0.51);
+  expect(scaleValue([0, 100, 50], [0.5, 2, 1], 99)).toEqual(1.98);
+});
 
 test("zoomViewBox zooms in correctly", () => {
   const baseViewBox: ViewBox = {

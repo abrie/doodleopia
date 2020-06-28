@@ -1,5 +1,5 @@
 import { AttributedCoordinate, AttributedCoordinates } from "./coordinates";
-import Canvas, { CanvasEventHandler } from "./canvas";
+import Canvas, { CanvasEventHandler, scaleValue } from "./canvas";
 import CursorTracker, { CursorTrackerEventHandler } from "./cursortracker";
 import PointerTracker, { PointerTrackerEventHandler } from "./pointertracker";
 import Polylines, { PolylineEventHandler } from "./polylines";
@@ -189,13 +189,22 @@ function processMessage(message: Message) {
 }
 
 function attachUIEventHandlers() {
-  document
-    .getElementById("zoom")
-    .addEventListener(
-      "input",
-      (evt) =>
-        (canvas.zoom = parseFloat((evt.target as HTMLInputElement).value))
+  document.getElementById("zoom").addEventListener("input", (evt) => {
+    const target = evt.currentTarget as HTMLInputElement;
+    const min = parseFloat(target.min);
+    const max = parseFloat(target.max);
+    const mid = parseFloat(target.defaultValue);
+    const val = parseFloat(target.value);
+
+    const minZoom = 0.05;
+    const maxZoom = 5;
+    const unityZoom = 1;
+    canvas.zoom = scaleValue(
+      [min, max, mid],
+      [minZoom, maxZoom, unityZoom],
+      val
     );
+  });
 
   document
     .getElementById("store-button")

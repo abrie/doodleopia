@@ -1,6 +1,14 @@
 import { SVGCoordinateTransformer, AttributedCoordinate } from "../coordinates";
 import { CoordinateTransformer, Coordinate } from "../coordinates";
-import { createSvgElement, ViewBox, setSvgViewBox, zoomViewBox } from "./svg";
+import {
+  createSvgElement,
+  ViewBox,
+  setSvgViewBox,
+  zoomViewBox,
+  scaleValue,
+} from "./svg";
+
+export { scaleValue };
 
 interface CanvasInterface {
   startPolyline: (element: SVGElement) => void;
