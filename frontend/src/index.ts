@@ -191,7 +191,7 @@ function processMessage(message: Message) {
 function attachUIEventHandlers() {
   document.getElementById("zoom").addEventListener("input", (evt) => {
     const target = evt.currentTarget as HTMLInputElement;
-    canvas.zoom = parseFloat(target.value);
+    canvas.zoom = parseFloat(target.max) - parseFloat(target.value);
   });
 
   document
