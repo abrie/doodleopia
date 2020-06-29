@@ -1,12 +1,6 @@
 import { SVGCoordinateTransformer, AttributedCoordinate } from "../coordinates";
 import { CoordinateTransformer, Coordinate } from "../coordinates";
-import {
-  createSvgElement,
-  ViewBox,
-  setSvgViewBox,
-  zoomViewBox,
-  panViewBox,
-} from "./svg";
+import { createSvgElement, ViewBox, setSvgViewBox, zoomViewBox } from "./svg";
 
 interface CanvasInterface {
   startPolyline: (element: SVGElement) => void;
@@ -42,6 +36,7 @@ export default class Canvas implements CanvasInterface {
   viewBox: ViewBox = { ...this.baseViewBox };
   domParser = new DOMParser();
   xmlSerializer = new XMLSerializer();
+  scrollChild: HTMLDivElement = undefined;
 
   constructor({ target, eventHandler }: CanvasConstructor) {
     this.workingCanvas = createSvgElement(this.viewBox);
@@ -56,15 +51,15 @@ export default class Canvas implements CanvasInterface {
     el.setAttribute("id", "scroller");
     target.appendChild(el);
 
-    const el2 = document.createElement("div");
-    el2.setAttribute("id", "scroll-child");
-    el.appendChild(el2);
+    this.scrollChild = document.createElement("div");
+    this.scrollChild.setAttribute("id", "scroll-child");
+    el.appendChild(this.scrollChild);
 
     el.addEventListener("scroll", (evt) => {
       const target = evt.currentTarget as HTMLDivElement;
 
-      this.panX = Math.min(0.5, target.scrollLeft / target.scrollWidth);
-      this.panY = Math.min(0.5, target.scrollTop / target.scrollHeight);
+      this.panX = target.scrollLeft / target.scrollWidth;
+      this.panY = target.scrollTop / target.scrollHeight;
       this.zoom = this.zoomFactor; // Force redraw
     });
 
@@ -109,7 +104,7 @@ export default class Canvas implements CanvasInterface {
   set zoom(f: number) {
     this.zoomFactor = f;
 
-    this.viewBox = zoomViewBox(this.baseViewBox, f);
+    this.viewBox = zoomViewBox(this.baseViewBox, f, [this.panX, this.panY]);
 
     if (this.animationFrameRequest) {
       window.cancelAnimationFrame(this.animationFrameRequest);
@@ -119,6 +114,8 @@ export default class Canvas implements CanvasInterface {
       setSvgViewBox(this.workingCanvas, this.viewBox);
       setSvgViewBox(this.finishedCanvas, this.viewBox);
       setSvgViewBox(this.cursorCanvas, this.viewBox);
+      this.scrollChild.style.width = `${(100 / this.zoomFactor) * 2}%`;
+      this.scrollChild.style.height = `${(100 / this.zoomFactor) * 2}%`;
       this.animationFrameRequest = undefined;
     });
   }

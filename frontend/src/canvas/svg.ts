@@ -5,34 +5,23 @@ export interface ViewBox {
   height: number;
 }
 
-export function panViewBox(
-  baseViewBox: ViewBox,
+export function zoomViewBox(
   viewBox: ViewBox,
-  maxZoom: number,
-  panX: number,
-  panY: number
+  factor: number,
+  pan: [number, number]
 ): ViewBox {
-  const maxZoomedViewBox = zoomViewBox(baseViewBox, maxZoom);
-  const dWidth = Math.abs(maxZoomedViewBox.width - viewBox.width);
-  const dHeight = Math.abs(maxZoomedViewBox.height - viewBox.height);
-
-  return {
-    left: viewBox.left + panX * dWidth,
-    top: viewBox.top + panY * dHeight,
-    width: viewBox.width,
-    height: viewBox.height,
-  };
-}
-
-export function zoomViewBox(viewBox: ViewBox, factor: number): ViewBox {
   const width = viewBox.width * factor;
   const height = viewBox.height * factor;
-  const left = (viewBox.width - viewBox.width * factor) / 2;
-  const top = (viewBox.height - viewBox.height * factor) / 2;
+  const left = (viewBox.width - width) / 2;
+  const top = (viewBox.height - height) / 2;
+
+  const [panX, panY] = pan;
+  const dx = (viewBox.width - width) * panX;
+  const dy = (viewBox.height - height) * panY;
 
   return <ViewBox>{
-    left,
-    top,
+    left: left + dx,
+    top: top + dy,
     width,
     height,
   };
