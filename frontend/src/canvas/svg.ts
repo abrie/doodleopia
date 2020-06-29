@@ -12,12 +12,12 @@ export function zoomViewBox(
 ): ViewBox {
   const width = viewBox.width * factor;
   const height = viewBox.height * factor;
-  const left = (viewBox.width - width) / 2;
-  const top = (viewBox.height - height) / 2;
+  const left = 0;
+  const top = 0;
 
   const [panX, panY] = pan;
-  const dx = (viewBox.width - width) * panX;
-  const dy = (viewBox.height - height) * panY;
+  const dx = viewBox.width * panX;
+  const dy = viewBox.height * panY;
 
   return <ViewBox>{
     left: left + dx,

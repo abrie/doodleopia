@@ -114,8 +114,8 @@ export default class Canvas implements CanvasInterface {
       setSvgViewBox(this.workingCanvas, this.viewBox);
       setSvgViewBox(this.finishedCanvas, this.viewBox);
       setSvgViewBox(this.cursorCanvas, this.viewBox);
-      this.scrollChild.style.width = `${(100 / this.zoomFactor) * 2}%`;
-      this.scrollChild.style.height = `${(100 / this.zoomFactor) * 2}%`;
+      this.scrollChild.style.width = `${100 / f}%`;
+      this.scrollChild.style.height = `${100 / f}%`;
       this.animationFrameRequest = undefined;
     });
   }

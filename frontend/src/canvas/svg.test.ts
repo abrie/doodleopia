@@ -12,8 +12,8 @@ test("zoomViewBox zooms correctly with zero pan.", () => {
   const zoomedViewBox = zoomViewBox(baseViewBox, 0.5, [0, 0]);
 
   const expected = {
-    left: 475,
-    top: 150,
+    left: 0,
+    top: 0,
     width: 950,
     height: 300,
   };
