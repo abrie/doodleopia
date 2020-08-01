@@ -14,7 +14,7 @@ type Client struct {
 	playback chan [][]byte
 }
 
-type InboundMessage struct {
+type InboundPayload struct {
 	Source  *Client
 	Payload *[]byte
 }
@@ -58,7 +58,7 @@ func (c *Client) readPump() {
 			break
 		}
 
-		c.hub.inbound <- &InboundMessage{Source: c, Payload: &message}
+		c.hub.inbound <- &InboundPayload{Source: c, Payload: &message}
 	}
 }
 
