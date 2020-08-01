@@ -9,7 +9,7 @@ type Hub struct {
 	// Registered clients.
 	clients map[*Client]bool
 
-	inbound chan *InboundMessage
+	inbound chan *InboundPayload
 
 	// Register requests from the clients.
 	register chan *Client
@@ -23,7 +23,7 @@ type Hub struct {
 
 func newHub(collector *collector.Collector) *Hub {
 	return &Hub{
-		inbound:    make(chan *InboundMessage),
+		inbound:    make(chan *InboundPayload),
 		register:   make(chan *Client),
 		unregister: make(chan *Client),
 		clients:    make(map[*Client]bool),
