@@ -5,7 +5,7 @@
     "generate": "flatc --ts -o src/message/ ../flatbuffers/message.fbs && sed -i '' s/\\\\.\\\\/flatbuffers/flatbuffers/ src/message/message_generated.ts",
     "prestart": "yarn run generate",
     "prebuild": "yarn run generate",
-    "deploy": "snowpack build && rsync -avp build/ core@abrie.dev:/home/core/data/doodleopia/www",
+    "deploy": "snowpack build && rsync -avp --exclude __snowpack__/ --exclude _dist_/ --exclude web_modules/ --delete build/ core@abrie.dev:/home/core/data/doodleopia/www",
     "test": "jest",
     "format": "prettier --write 'src/**/*.js'",
     "lint": "prettier --check 'src/**/*.js'"
