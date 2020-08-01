@@ -67,6 +67,52 @@ func buildMessage(clientId uint16, action message.Action, x, y float32) []byte {
 	return bytes
 }
 
+func TestCollectorSinceClear(t *testing.T) {
+	messages := [][]byte{
+		buildMessage(12345, message.ActionDown, 60.1, 60.2),
+		buildMessage(12345, message.ActionMove, 100.5, 200.5),
+		buildMessage(12345, message.ActionUp, 200.5, 230.5),
+		buildMessage(12345, message.ActionClear, 100.5, 200.5),
+		buildMessage(12345, message.ActionDown, 160.1, 80.2),
+		buildMessage(12345, message.ActionMove, 150.5, 210.5),
+		buildMessage(12345, message.ActionUp, 205.5, 5.1),
+		buildMessage(12345, message.ActionClear, 100.5, 200.5),
+		buildMessage(12345, message.ActionDown, 160.1, 80.2),
+		buildMessage(12345, message.ActionUp, 160.1, 80.2),
+	}
+
+	wants := [][]byte{
+		messages[7],
+		messages[8],
+		messages[9],
+	}
+
+	collector := NewTestCollector()
+	collector.Start()
+
+	for idx := range messages {
+		collector.Sink <- &messages[idx]
+	}
+
+	collector.Stop()
+	<-collector.Finished
+
+	got, err := collector.ReadSinceLastClear()
+	if err != nil {
+		t.Fatalf("Got an unexpected Read() error: %v", err)
+	}
+
+	if len(got) != len(wants) {
+		t.Fatalf("Expected %d messages, Got %d.", len(wants), len(got))
+	}
+
+	for idx, want := range wants {
+		if cmp.Equal(want, got[idx]) != true {
+			t.Fatalf("Record does not match expected: %s\n", cmp.Diff(want, got))
+		}
+	}
+}
+
 func TestCollectorValidMessages(t *testing.T) {
 	messages := [][]byte{
 		buildMessage(12345, message.ActionDown, 60.1, 60.2),
@@ -109,12 +155,11 @@ func TestCollectorValidMessages(t *testing.T) {
 }
 
 func TestExpectErrorIfInvalidMessages(t *testing.T) {
-	return
 	wants := [][]byte{
-		[]byte{42, 50, 6, 9, 0},
-		[]byte{1, 2, 3},
-		[]byte{4, 5, 6},
-		[]byte{100, 0, 200, 0, 0},
+		{42, 50, 6, 9, 0},
+		{1, 2, 3},
+		{4, 5, 6},
+		{100, 0, 200, 0, 0},
 	}
 
 	collector := NewTestCollector()
