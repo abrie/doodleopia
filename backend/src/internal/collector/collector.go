@@ -32,6 +32,36 @@ func NewCollector(writer io.WriteCloser, reader io.ReadSeeker) *Collector {
 	}
 }
 
+func isClearMessage(input []byte) bool {
+	return message.GetRootAsMessage(input, 0).Action() == message.ActionClear
+}
+
+func sinceLastClear(input [][]byte) [][]byte {
+	idx := len(input)
+
+	for {
+		if idx == 0 {
+			break
+		}
+
+		idx = idx - 1
+
+		if isClearMessage(input[idx]) {
+			break
+		}
+	}
+
+	return input[idx:]
+}
+
+func (s *Collector) ReadSinceLastClear() ([][]byte, error) {
+	if messages, err := s.Read(); err != nil {
+		return make([][]byte, 0), err
+	} else {
+		return sinceLastClear(messages), nil
+	}
+}
+
 func (s *Collector) Read() ([][]byte, error) {
 	var messages [][]byte
 
