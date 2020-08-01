@@ -18,7 +18,7 @@
     invariant "^2.2.4"
     semver "^5.5.0"
 
-"@babel/core@^7.1.0", "@babel/core@^7.10.2", "@babel/core@^7.7.5", "@babel/core@^7.9.6":
+"@babel/core@^7.1.0", "@babel/core@^7.10.2", "@babel/core@^7.7.5":
   version "7.11.0"
   resolved "https://registry.yarnpkg.com/@babel/core/-/core-7.11.0.tgz#73b9c33f1658506887f767c26dae07798b30df76"
   integrity sha512-mkLq8nwaXmDtFmRkQ8ED/eA2CnVw4zr7dCztKalZXBvdK5EeNUAesrrwUqjQEzFgomJssayzB0aqlOsP1vGLqg==
@@ -1201,13 +1201,6 @@
   integrity sha512-MZPUxrmFubI36XS1DI3qmI0YdN1gks62JtFZvxR67ljjSNCeK6U08Zx4msEWOXuofgqUt6zPHSi1H9fbjR/NRA==
   dependencies:
     "@sinonjs/commons" "^1.7.0"
-
-"@snowpack/plugin-babel@^1.0.0":
-  version "1.4.0"
-  resolved "https://registry.yarnpkg.com/@snowpack/plugin-babel/-/plugin-babel-1.4.0.tgz#050fb696f4357985187863c24878426009b48014"
-  integrity sha512-kObuiJ49n2fW76cnLvLUasFR70vX98ZNcdvqKHjzNzAFHbi0nT4Qdt8G/y9KAsof3Py7/hLnfgGvLFoOws5Czg==
-  dependencies:
-    "@babel/core" "^7.9.6"
 
 "@snowpack/plugin-build-script@^2.0.2":
   version "2.0.2"
@@ -6849,7 +6842,7 @@ snapdragon@^0.8.1:
     source-map-resolve "^0.5.0"
     use "^3.1.0"
 
-snowpack@^2.0.0:
+snowpack@^2.7.0:
   version "2.7.5"
   resolved "https://registry.yarnpkg.com/snowpack/-/snowpack-2.7.5.tgz#57d97be9986c99e9ae518e6d0c8a79121e180b1e"
   integrity sha512-Z/SDKVkAjoXjqBFuTQIb8uWuxt7Tg8auoFMcnsqBCwlmMkryMDLYwm7KTgY3MukWhUQhiIwR1/8Sxdf6MB+OFw==
