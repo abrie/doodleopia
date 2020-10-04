@@ -25,6 +25,7 @@ Yet another collaborative drawing app, born from the [2020 Pandemic](https://en.
 - https://multiuser-sketchpad.glitch.me
 - https://hundredrabbits.github.io/Noodle/
 - https://www.whiteborb.com/FFqmdOXEVM
+- https://witeboard.com/
 
 ## Addendum
 
