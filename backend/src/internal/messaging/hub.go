@@ -37,7 +37,7 @@ func (h *Hub) run() {
 
 		case client := <-h.register:
 			h.clients[client] = true
-			messages, err := h.collector.Read()
+			messages, err := h.collector.ReadSinceLastClear()
 			if err != nil {
 				log.Printf("Failed to read from log: %v", err)
 			} else {
